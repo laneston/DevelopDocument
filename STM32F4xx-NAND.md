@@ -12,47 +12,56 @@ NAND闪存设备的典型页面读取操作如下：
 
 <img src="https://github.com/laneston/Pictures/blob/master/Post-STM32F4xx_NAND/Access%20to%20non%20%E2%80%98CE%20don%E2%80%99t%20care%E2%80%99%20NAND-Flash.jpg" width="50%" height="50%">
 
-
 1. CPU wrote byte 0x00 at address 0x7001 0000.
 2. CPU wrote byte A7-A0 at address 0x7002 0000.
 3. CPU wrote byte A15-A8 at address 0x7002 0000.
 4. CPU wrote byte A23-A16 at address 0x7002 0000.
 5. CPU wrote byte A25-A24 at address 0x7802 0000: FSMC performs a write access using FSMC_PATT2 timing definition, where ATTHOLD ≥7 (providing that (7+1) × HCLK = 112 ns > tWB max). This guarantees that NCE remains low until R/NB goes low and high again (only requested for NAND Flash memories where NCE is not don’t care).
 
-
 当需要NAND闪存预等待功能时，可以通过编程MEMHOLD值来满足tWB定时来保证。然而，对NAND闪存的CPU读取访问具有（MEMHOLD+2）x HCLK周期的保持延迟，而CPU写入访问的保持延迟为（MEMHOLD）x HCLK周期。
+
 为了克服这种定时限制，可以使用属性内存空间，方法是用满足tWB定时的ATTHOLD值对其定时寄存器进行编程，并将MEMHOLD值保持在最小值。然后，CPU必须将公共内存空间用于所有NAND闪存读写访问，除非将最后一个地址字节写入NAND闪存设备，CPU必须写入属性内存空间。
 
-
 ## Part 2
+
 CPU在公共内存空间执行字节写入，数据字节等于一个闪存命令字节（例如，对于Samsung NAND闪存设备，为0x00）。NAND闪存的CLE输入在写入选通（NWE上的低脉冲）期间处于活动状态，因此写入的字节被解释为NAND闪存的命令。一旦命令被NAND Flash设备锁定，就不需要为下面的页面读取操作写入该命令。
 
 ## Part 3
+
 CPU可以通过写入所需的字节来发送读操作的起始地址（STARTAD），例如，对于容量较小的设备，四个字节或三个字节。STARTAD[7:0]、STARTAD[15:8]、STARTAD[23:16]和TARTAD[25:24]，用于64 Mb x 8位NAND闪存。NAND闪存设备的ALE输入在写入选通（NWE上的低脉冲）期间处于活动状态，因此写入的字节被解释为读取操作的起始地址。使用属性内存空间可以使用FSMC的不同计时配置，该配置可用于实现一些NAND闪存所需的预等待功能。
 
 ## Part 4
+
 控制器等待NAND闪存准备就绪（R/NB信号高）变为活动状态，然后开始新的访问（到同一个或另一个内存库）。等待时，控制器保持NCE信号激活（低）。
 
 ## Part 5
+
 然后，CPU可以在公共内存空间中执行字节读取操作，逐字节读取NAND闪存页（数据字段+备用字段）。
 
 ## Part 6
+
 下一个NAND闪存页可以在没有任何CPU命令或地址写入操作的情况下以三种不同的方式读取：
+
 1. 只需执行步骤5中描述的操作；
 2. 可以通过在步骤3重新启动操作来访问新的随机地址；
 3. 通过在步骤2重新启动，可以向NAND闪存设备发送新命令。
 
 # Error Correction Code (ECC)
+
 FSMC PC卡控制器包括两个纠错码计算硬件块，每个存储库一个。它们用于减少系统软件处理纠错码时主机CPU的工作量。这两个寄存器相同，分别与bank 2和bank 3相关联。因此，没有硬件ECC计算可用于连接到bank 4的存储器。
+
 FSMC中实现的纠错码（ECC）算法可以对从NAND闪存读写的256、512、1024、2048、4096或8192个字节执行1位纠错和2位错误检测。它基于汉明编码算法，包括行和列奇偶校验的计算。
+
 每次NAND闪存组激活时，ECC模块监测NAND闪存数据总线和读/写信号（NCE和NWE）。
 
 功能操作包括：
+
 - 当对bank 2和bank 3进行NAND闪存访问时，D[15:0]总线上的数据被锁定并用于ECC计算。
 - 在任何地址访问NAND闪存时，ECC逻辑处于空闲状态，不执行任何操作。因此，定义命令或地址的写操作不考虑在ECC计算中。
 
 一旦CPU从NAND闪存读取/写入所需的字节数，必须读取FSMC_ECCR2/3寄存器以检索计算值。一旦读取，应通过将ECCEN位重置为零来清除它们。要计算新的数据块，ECCEN位必须在FSMC_PCR2/3寄存器中设置为1。
 执行ECC计算：
+
 1.	在FSMC_PCR2/3寄存器中启用ECCEN位。
 2.	将数据写入NAND闪存页。写入NAND页时，ECC块计算ECC值。
 3.	读取FSMC_ECCR2/3寄存器中可用的ECC值，并将其存储在变量中。
@@ -61,7 +70,9 @@ FSMC中实现的纠错码（ECC）算法可以对从NAND闪存读写的256、512
 6.	如果两个ECC值相同，则不需要进行校正，否则会出现ECC错误，并且软件校正例程返回有关错误是否可以校正的信息。
 
 # Timing diagrams for NAND
+
 每个PC卡/CompactFlash和NAND闪存库通过一组寄存器进行管理：
+
 - 控制寄存器：FSMC_PCRx
 - 中断状态寄存器：FSMC_SRx
 - 纠错码（EEC）寄存器：FSMC_ECCRx
@@ -70,3 +81,8 @@ FSMC中实现的纠错码（ECC）算法可以对从NAND闪存读写的256、512
 - I/O空间定时寄存器：FSMC_PIOx
 
 每个定时配置寄存器包含三个参数，用于定义任何PC卡/CompactFlash或NAND Flash访问的三个阶段的HCLK循环数，外加一个参数，用于定义在写入时开始驱动数据总线的定时。图表 2显示了公共内存访问的计时参数定义，知道了[属性存储空间]和[I/O存储空间]（仅适用于PC卡）内存空间访问时序是相似的。
+
+<img src="https://github.com/laneston/Pictures/blob/master/Post-STM32F4xx_NAND/NAND%20controller%20timing%20for%20common%20memory%20access.jpg" width="50%" height="50%">
+
+1.	在写入访问期间，NOE保持高（非活动）。在读取访问期间，NWE保持高（非活动）。
+2.	对于写访问，保持相位延迟为（MEMHOLD）x HCLK周期，而对于读访问，保持相位延迟为（MEMHOLD+2）x HCLK周期。
