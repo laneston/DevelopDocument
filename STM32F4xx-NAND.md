@@ -16,7 +16,7 @@ NAND闪存设备的典型页面读取操作如下：
 2. CPU wrote byte A7-A0 at address 0x7002 0000.
 3. CPU wrote byte A15-A8 at address 0x7002 0000.
 4. CPU wrote byte A23-A16 at address 0x7002 0000.
-5. CPU wrote byte A25-A24 at address 0x7802 0000: FSMC performs a write access using FSMC_PATT2 timing definition, where ATTHOLD ≥$\varepsilon$7 (providing that (7+1) × HCLK = 112 ns > tWB max). This guarantees that NCE remains low until R/NB goes low and high again (only requested for NAND Flash memories where NCE is not don’t care).
+5. CPU wrote byte A25-A24 at address 0x7802 0000: FSMC performs a write access using FSMC_PATT2 timing definition, where ATTHOLD ≥\varepsilon7 (providing that (7+1) × HCLK = 112 ns > tWB max). This guarantees that NCE remains low until R/NB goes low and high again (only requested for NAND Flash memories where NCE is not don’t care).
 
 当需要NAND闪存预等待功能时，可以通过编程MEMHOLD值来满足tWB定时来保证。然而，对NAND闪存的CPU读取访问具有（MEMHOLD+2）x HCLK周期的保持延迟，而CPU写入访问的保持延迟为（MEMHOLD）x HCLK周期。
 
