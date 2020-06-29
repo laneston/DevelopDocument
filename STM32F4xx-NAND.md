@@ -12,6 +12,8 @@ NAND闪存设备的典型页面读取操作如下：
 
 ![Access to non ‘CE don’t care’ NAND-Flash](https://github.com/laneston/Pictures/blob/master/Post-STM32F4xx_NAND/Access%20to%20non%20%E2%80%98CE%20don%E2%80%99t%20care%E2%80%99%20NAND-Flash.jpg =100x100)
 
+<img src="https://github.com/laneston/Pictures/blob/master/Post-STM32F4xx_NAND/Access%20to%20non%20%E2%80%98CE%20don%E2%80%99t%20care%E2%80%99%20NAND-Flash.jpg" width="50%" height="50%">
+
 
 1. CPU wrote byte 0x00 at address 0x7001 0000.
 2. CPU wrote byte A7-A0 at address 0x7002 0000.
