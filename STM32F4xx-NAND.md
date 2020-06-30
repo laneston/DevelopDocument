@@ -1,6 +1,7 @@
 
 
 <a href="#Timing diagrams for NAND">Timing diagrams for NAND</a>
+<a href="#Error Correction Code">Error Correction Code (ECC)</a>
 
 # STM32F4xx Part
 
@@ -28,7 +29,7 @@ NAND闪存设备的典型页面读取操作如下：
 2. 可以通过在步骤3重新启动操作来访问新的随机地址；
 3. 通过在步骤2重新启动，可以向NAND闪存设备发送新命令。
 
-## Error Correction Code (ECC)
+<h3 id="Error Correction Code">Error Correction Code (ECC)</h3>
 
 FSMC PC卡控制器包括两个纠错码计算硬件块，每个存储库一个。它们用于减少系统软件处理纠错码时主机CPU的工作量。这两个寄存器相同，分别与bank 2和bank 3相关联。因此，没有硬件ECC计算可用于连接到bank 4的存储器。
 
