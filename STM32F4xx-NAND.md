@@ -1,4 +1,6 @@
-[STM32F4xx Part](#STM32F4xx Part)
+
+
+<a href="#head">click</a>
 
 # STM32F4xx Part
 
@@ -50,7 +52,7 @@ FSMC中实现的纠错码（ECC）算法可以对从NAND闪存读写的256、512
 5.	ECC寄存器3中可用的新ECC/R2值。
 6.	如果两个ECC值相同，则不需要进行校正，否则会出现ECC错误，并且软件校正例程返回有关错误是否可以校正的信息。
 
-## Timing diagrams for NAND
+## <h3 id="head">Timing diagrams for NAND</h3>
 
 每个PC卡/CompactFlash和NAND闪存库通过一组寄存器进行管理：
 
