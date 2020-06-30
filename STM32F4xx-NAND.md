@@ -1,8 +1,7 @@
+目录
 
-
-<a href="#Timing diagrams for NAND">Timing diagrams for NAND</a>
-
-<a href="#Error Correction Code">Error Correction Code (ECC)</a>
+- <a href="#Timing diagrams for NAND">Timing diagrams for NAND</a>
+- <a href="#Error Correction Code">Error Correction Code (ECC)</a>
 
 # STM32F4xx Part
 
