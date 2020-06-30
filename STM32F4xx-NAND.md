@@ -1,4 +1,4 @@
-[toc]
+[STM32F4xx Part](#STM32F4xx Part)
 
 # STM32F4xx Part
 
