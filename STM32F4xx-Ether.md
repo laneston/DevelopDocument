@@ -1,4 +1,4 @@
-<h2 id="Ethernet main features"> Ethernet main features </h2>
+<h1 id="Ethernet main features"> Ethernet main features </h1>
 
 以太网外备使STM32F4xx能够根据IEEE 802.3-2002标准通过以太网发送和接收数据。它设提供了一个可配置的、灵活的外围设备，以满足各种应用和客户的需求。它支持到外部物理层（PHY）的两个行业标准接口：IEEE 802.3规范中定义的默认媒体独立接口（MII）和精简媒体独立接口（RMII）。它可以用于许多应用，如交换机、网络接口卡等。
 
@@ -142,15 +142,14 @@ DMA控制器通过AHB主从接口与核心和存储器接口。AHB主接口控�
 
 注：使用以太网时，AHB时钟频率必须至少为25 MHz。
 
-![img](file:///C:/Users/ADMINI~1/AppData/Local/Temp/msohtmlclip1/01/clip_image002.jpg)
 
-Figure 1ETH block diagram
 
-## Station management interface: SMI
 
-## Media-independent interface: MII
+<h3 id="Station management interface"> Station management interface: SMI </h3>
 
-## Reduced media-independent interface: RMII
+<h3 id="Media-independent interface"> Media-independent interface: MII </h3>
+
+<h3 id="Reduced media-independent interface"> Reduced media-independent interface: RMII </h3>
 
 精简的媒体独立接口（RMII）规范以10/100mbit/s的速度减少了微控制器以太网外围设备和外部以太网之间的管脚数。
 
@@ -158,35 +157,26 @@ Figure 1ETH block diagram
 
 RMII在MAC和PHY之间实例化。这有助于将MAC的MII转换为RMII。RMII块具有以下特征：
 
-l 支持10 Mbit/s和100 Mbit/s的工作速率
+- 支持10 Mbit/s和100 Mbit/s的工作速率
 
-l 时钟基准必须加倍至50 MHz
+- 时钟基准必须加倍至50 MHz
 
-l 相同的时钟参考必须从外部来源到MAC和外部以太网PHY
+- 相同的时钟参考必须从外部来源到MAC和外部以太网PHY
 
-l 它提供独立的2位宽（dibit）传输和接收数据路径
+- 它提供独立的2位宽（dibit）传输和接收数据路径
 
-![img](file:///C:/Users/ADMINI~1/AppData/Local/Temp/msohtmlclip1/01/clip_image004.png)
 
-Figure 2Reduced media-independent interface signals
 
 从外部50MHz时钟对PHY进行时钟，或者使用带有嵌入式PLL的PHY来生成50MHz频率。
 
-![img](file:///C:/Users/ADMINI~1/AppData/Local/Temp/msohtmlclip1/01/clip_image006.png)
 
-Figure 3RMII clock sources
-
-## MII/RMII selection
+<h3 id="MII/RMII selection"> MII/RMII selection </h3>
 
 模式MII或RMII是使用SYSCFG_PMC寄存器中的配置位23 MII_RMII_SEL来选择的。当以太网控制器处于重置状态或启用时钟之前，应用程序必须设置MII/RMII模式。
 
-![img](file:///C:/Users/ADMINI~1/AppData/Local/Temp/msohtmlclip1/01/clip_image008.png)
 
-Figure 4Clock scheme
 
-The MII/RMII selection is controlled through bit 23, MII_RMII_SEL, in the SYSCFG_PMC register.
-
-为了保存一个管脚，两个输入时钟信号RMII_REF_CK和MII_RX_CLK被多路复用在同一个GPIO管脚上。
+为了节省一个引脚，两个输入时钟信号RMII_REF_CK和MII_RX_CLK被多路复用在同一个GPIO管脚上。
 
 # MAC 802.3
 
