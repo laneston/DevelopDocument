@@ -1,13 +1,15 @@
-目录
-
+**目录**
+<a href="#STM32F4xx Part">STM32F4xx Part</a><br>
+- <a href="#NAND Flash operations">NAND Flash operations</a>
 - <a href="#Timing diagrams for NAND">Timing diagrams for NAND</a>
 - <a href="#Error Correction Code">Error Correction Code (ECC)</a>
 
-# STM32F4xx Part
+
+ <h1 id=" STM32F4xx Part"> STM32F4xx Part</h1>
 
 这一部分是关于STM32的灵活静态存储控制器（FSMC）在NAND Flash上的应用方式。
 
-## NAND Flash operations
+ <h3 id="NAND Flash operations">NAND Flash operations</h3>
 
 NAND闪存设备的命令锁存使能（CLE）和地址锁存使能（ALE）信号由FSMC控制器的一些地址信号驱动。这意味着要向NAND闪存发送命令或地址，CPU必须对其内存空间中的某个地址执行写入操作。
 
