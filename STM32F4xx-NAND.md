@@ -13,12 +13,14 @@
  <h3 id="8-bit NAND Flash">8-bit NAND Flash</h3>
  
 |  FSMC signal name   | I/O  |   Function  |
-| ------------------- | ---- | ----------- |
-| A[17] | O |NAND Flash address latch enable (ALE) signal|
-| A[16] | O |NAND Flash command latch enable (CLE) signal|
-|D[7:0]| I/O|8-bit multiplexed, bidirectional address/data bus|
-
-
+| :-----------------: | ---- | ----------- |
+|A[17] |O  |NAND Flash address latch enable (ALE) signal|
+|A[16] |O  |NAND Flash command latch enable (CLE) signal|
+|D[7:0]|I/O|8-bit multiplexed, bidirectional address/data bus|
+|NCE[x]| O | Chip select, x = 2, 3|
+|NOE(= NRE)| O |Output enable (memory signal name: read enable, NRE)|
+|NWE| O |Write enable|
+|NWAIT/INT[3:2]| I |NAND Flash ready/busy input signal to the FSMC|
 
  <h3 id="NAND Flash operations">NAND Flash operations</h3>
 
