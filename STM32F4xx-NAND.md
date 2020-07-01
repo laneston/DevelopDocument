@@ -1,6 +1,7 @@
 **目录**
 
 <a href="#STM32F4xx Part">STM32F4xx Part</a><br>
+- <a href="#8-bit NAND Flash">8-bit NAND Flash</a>
 - <a href="#NAND Flash operations">NAND Flash operations</a>
 - <a href="#Timing diagrams for NAND">Timing diagrams for NAND</a>
 - <a href="#Error Correction Code">Error Correction Code (ECC)</a>
