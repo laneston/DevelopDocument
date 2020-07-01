@@ -10,6 +10,16 @@
 
 这一部分是关于STM32的灵活静态存储控制器（FSMC）在NAND Flash上的应用方式。
 
+ <h3 id="8-bit NAND Flash">8-bit NAND Flash</h3>
+ 
+|  FSMC signal name   | I/O  |   Function  |
+| ------------------- | ---- | ----------- |
+| A[17] | O |NAND Flash address latch enable (ALE) signal|
+| A[16] | O |NAND Flash command latch enable (CLE) signal|
+|D[7:0]| I/O|8-bit multiplexed, bidirectional address/data bus|
+
+
+
  <h3 id="NAND Flash operations">NAND Flash operations</h3>
 
 NAND闪存设备的命令锁存使能（CLE）和地址锁存使能（ALE）信号由FSMC控制器的一些地址信号驱动。这意味着要向NAND闪存发送命令或地址，CPU必须对其内存空间中的某个地址执行写入操作。
