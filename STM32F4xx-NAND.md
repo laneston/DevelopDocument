@@ -9,7 +9,7 @@
 
  <h1 id=" STM32F4xx Part"> STM32F4xx Part</h1>
 
-这一部分是关于STM32的灵活静态存储控制器（FSMC）在NAND Flash上的应用方式。
+这一部分内容是关于STM32的灵活静态存储控制器（FSMC）在NAND Flash上的应用方式与注意事项。
 
  <h3 id="8-bit NAND Flash">8-bit NAND Flash</h3>
  
