@@ -1,8 +1,8 @@
-# Ethernet main features
+<h2 id="Ethernet main features"> Ethernet main features </h2>
 
 以太网外备使STM32F4xx能够根据IEEE 802.3-2002标准通过以太网发送和接收数据。它设提供了一个可配置的、灵活的外围设备，以满足各种应用和客户的需求。它支持到外部物理层（PHY）的两个行业标准接口：IEEE 802.3规范中定义的默认媒体独立接口（MII）和精简媒体独立接口（RMII）。它可以用于许多应用，如交换机、网络接口卡等。
 
-<h3> MAC core features </h3>
+<h3 id="MAC core features"> MAC core features </h3>
 
 1. 有外部PHY接口并支持10/100mbit/s的数据传输速率。
 
