@@ -4,6 +4,7 @@
 - <a href="#MAC core features">MAC core features</a>
 - <a href="#DMA features">DMA features</a>
 - <a href="#PTP features">PTP features</a>
+
 <a href="SMI MII and RMII">SMI, MII and RMII</a>
 - <a href="#Station management interface">Station management interface: SMI</a>
 - <a href="#Media-independent interface">Media-independent interface: MII</a>
