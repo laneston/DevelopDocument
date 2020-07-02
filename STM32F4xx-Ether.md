@@ -10,6 +10,14 @@
 - <a href="#Media-independent interface">Media-independent interface: MII</a>
 - <a href="#Ethernet main features">Reduced media-independent interface: RMII</a>
 
+<a href="#MAC frame transmission">MAC frame transmission</a>
+- <a href="#Automatic CRC and pad genratione">Automatic CRC and pad genratione</a>
+- <a href="#Transmit protocol"></a>
+- <a href="#"></a>
+- <a href="#"></a>
+- <a href="#"></a>
+
+
 <h1 id="Ethernet main features"> Ethernet main features </h1>
 
 以太网外备使STM32F4xx能够根据IEEE 802.3-2002标准通过以太网发送和接收数据。它设提供了一个可配置的、灵活的外围设备，以满足各种应用和客户的需求。它支持到外部物理层（PHY）的两个行业标准接口：IEEE 802.3规范中定义的默认媒体独立接口（MII）和精简媒体独立接口（RMII）。它可以用于许多应用，如交换机、网络接口卡等。
@@ -300,27 +308,27 @@ MAC块实现IEEE 802.3-2002标准指定的MAC子层和可选MAC控制子层（10
 
 帧的CRC值计算如下：
 
-\1.   帧的前2位被补。
+1. 帧的前2位被补。
 
-\2.     帧的n位是次数(n–1)的多项式M(x)的系数。目标地址的第一位对应于![img](file:///C:/Users/ADMINI~1/AppData/Local/Temp/msohtmlclip1/01/clip_image018.png)项，数据字段的最后一位对应于![img](file:///C:/Users/ADMINI~1/AppData/Local/Temp/msohtmlclip1/01/clip_image020.png)项。
+2. 帧的n位是次数(n–1)的多项式M(x)的系数。目标地址的第一位对应于x^(n-1)项，数据字段的最后一位对应于x^0项。
 
-\3.     M(x)与![img](file:///C:/Users/ADMINI~1/AppData/Local/Temp/msohtmlclip1/01/clip_image022.png)相乘，再除以G(x)，产生一个小于31的余数。
+3. M(x)与x^32相乘，再除以G(x)，产生一个小于31的余数。
 
-\4.   R(x)的系数被视为32位序列。
+4. R(x)的系数被视为32位序列。
 
-\5.   位序列被补充，结果是CRC。
+5. 位序列被补充，结果是CRC。
 
-\6.     CRC值的32位放入帧检查序列中。![img](file:///C:/Users/ADMINI~1/AppData/Local/Temp/msohtmlclip1/01/clip_image022.png)项是第一个传输，![img](file:///C:/Users/ADMINI~1/AppData/Local/Temp/msohtmlclip1/01/clip_image020.png)项是最后一个传输。
+6. CRC值的32位放入帧检查序列中。x^32项是第一个传输，x^0项是最后一个传输。
 
 MAC帧的每个字节，除FCS字段外，首先传输低阶位。无效的MAC帧由以下条件之一定义：
 
-\1.   帧长度与长度/类型字段指定的预期值不一致。如果长度/类型字段包含类型值，则假定帧长度与此字段一致（没有无效帧）。
+1. 帧长度与长度/类型字段指定的预期值不一致。如果长度/类型字段包含类型值，则假定帧长度与此字段一致（没有无效帧）。
 
-\2.   帧长度不是整数字节数（额外位）。
+2. 帧长度不是整数字节数（额外位）。
 
-\3.   在传入帧上计算的CRC值与包含的FCS不匹配。
+3. 在传入帧上计算的CRC值与包含的FCS不匹配。
 
-## MAC frame transmission
+<h1 id="MAC frame transmission"> MAC frame transmission </h1>
 
 DMA控制传输路径的所有事务。从系统存储器读取的以太网帧被DMA推入FIFO。然后将这些帧弹出并传输到MAC核心。当帧结束被传输时，传输的状态从MAC核取出并传输回DMA。传输FIFO的深度为2Kbyte。FIFO填充级别指示给DMA，以便它可以使用AHB接口从系统内存启动所需的突发数据提取。来自AHB主接口的数据被推入FIFO。
 
@@ -328,37 +336,35 @@ DMA控制传输路径的所有事务。从系统存储器读取的以太网帧�
 
 向MAC核弹出数据有两种操作模式：
 
-\1.   在阈值模式下，只要FIFO中的字节数超过配置的阈值级别（或在超过阈值之前写入帧结束时），数据就可以弹出并转发到MAC核心。使用ETH-DMABMR的TTC位配置阈值大小。
+1. 在阈值模式下，只要FIFO中的字节数超过配置的阈值级别（或在超过阈值之前写入帧结束时），数据就可以弹出并转发到MAC核心。使用ETH-DMABMR的TTC位配置阈值大小。
 
-\2.   在存储和转发模式下，只有在FIFO中存储完整帧后，帧才会朝MAC核弹出。如果Tx FIFO的大小小于要传输的以太网帧，则当Tx FIFO几乎满时，该帧会向MAC核弹出。
+2. 在存储和转发模式下，只有在FIFO中存储完整帧后，帧才会朝MAC核弹出。如果Tx FIFO的大小小于要传输的以太网帧，则当Tx FIFO几乎满时，该帧会向MAC核弹出。
 
 应用程序可以通过设置FTF（ETH-DMAOMR register[20]）bit来刷新所有内容的传输FIFO。该位是自清除的，并将FIFO指针初始化为默认状态。如果在帧传输到MAC核期间设置了FTF位，则传输将停止，因为FIFO被认为是空的。因此，在MAC发射机处发生下溢事件，并且相应的状态字被转发到DMA。
 
-### Automatic CRC and pad generation
+<h3 id="Automatic CRC and pad genratione"> Automatic CRC and pad generation </h3>
 
 当从应用程序接收到的字节数低于60（DA+SA+LT+Data）时，在发送帧中追加零，使数据长度正好为46字节，以满足IEEE 802.3的最小数据字段要求。MAC可以编程为不附加任何填充。计算帧检查序列（FCS）字段的循环冗余校验（CRC），并将其附加到正在发送的数据中。当MAC被编程为不将CRC值附加到以太网帧的末尾时，计算出的CRC不会被发送。此规则的一个例外是，当MAC被编程为对小于60字节的帧（DA+SA+LT+Data）附加PAD时，CRC将被附加到填充帧的末尾。
 
 CRC生成器计算以太网帧的FCS字段的32位CRC。编码由以下多项式定义。
 
- 
+ <img src="https://github.com/laneston/Pictures/blob/master/Post-STM32F4xxP_Ether/Formula_20200702A.jpg" width="50%" height="50%">
 
-![img](file:///C:/Users/ADMINI~1/AppData/Local/Temp/msohtmlclip1/01/clip_image024.png)
-
-### Transmit protocol
+<h3 id="Transmit protocol"> Transmit protocol </h3>
 
 MAC控制以太网帧传输的操作。它执行以下功能以满足IEEE 802.3/802.3z规范。
 
-\1.   生成前导码和SFD。
+1. 生成前导码和SFD。
 
-\2.   以半双工模式生成阻塞模式。
+2. 以半双工模式生成阻塞模式。
 
-\3.   控制Jabber超时。
+3. 控制Jabber超时。
 
-\4.   控制半双工模式的流量（背压式）。
+4. 控制半双工模式的流量（背压式）。
 
-\5.   生成传输帧状态。
+5. 生成传输帧状态。
 
-\6.   包含符合IEEE1588的时间戳快照逻辑。
+6. 包含符合IEEE1588的时间戳快照逻辑。
 
 当请求新的帧传输时，MAC发送前导码和SFD，然后是数据。前导码被定义为0b10101010模式的7字节，SFD被定义为0b10101011模式的1字节。碰撞窗口定义为1时隙时间（10/100mbit/s以太网为512位时间）。干扰模式生成仅适用于半双工模式，而不适用于全双工模式。
 
@@ -368,13 +374,13 @@ MAC控制以太网帧传输的操作。它执行以下功能以满足IEEE 802.3/
 
 这会导致碰撞，远程工作站会后退。应用程序通过在ETH-MACFCR寄存器中设置BPA位（位0）来请求流控制。如果应用程序请求传输帧，则即使在启动背压时也会对其进行调度和传输。注意，如果背压保持激活很长一段时间（并且发生超过16个连续的碰撞事件），则远程站会因过度碰撞而中止其传输。如果为传输帧启用IEEE1588时间戳，则当SFD被放到传输MII总线上时，此块将获取系统时间的快照。
 
-### Transmit scheduler
+<h3 id="Transmit scheduler"> Transmit scheduler </h3>
 
 MAC负责调度MII上的帧传输。它保持两个传输帧之间的帧间隔，并遵循半双工模式下的截断二元指数退避算法。MAC在满足IFG和退避延迟后启用传输。它保持任意两个发送帧之间配置的帧间间隔（ETH-MACCR寄存器中的IFG位）的空闲周期。如果要发送的帧早于配置的IFG时间到达，则MII在开始对其发送之前等待来自MAC的使能信号。一旦MII的载波信号变为非活动状态，MAC就会启动IFG计数器。在编程的IFG值结束时，MAC启用全双工模式的传输。
 
 在半双工模式下，当IFG被配置为96位次时，MAC遵循IEEE 802.3规范第4.2.3.2.1节中规定的遵从规则。如果在IFG间隔的前三分之二（所有IFG值为64位倍）期间检测到载波，MAC重置其IFG计数器。如果在IFG间隔的最后三分之一期间检测到载波，MAC继续IFG计数并在IFG间隔之后启用发射机。MAC在半双工模式下运行时实现了截短的二进制指数退避算法。
 
-### Transmit flow control
+<h3 id="Transmit flow control"> Transmit flow control </h3>
 
 当发送流控制使能位（ETH-MACFCR中的TFE位）被设置时，MAC生成暂停帧，并在必要时以全双工模式发送它们。暂停帧被附加计算出的CRC，并被发送。暂停帧生成可以通过两种方式启动。
 
@@ -384,33 +390,33 @@ MAC负责调度MII上的帧传输。它保持两个传输帧之间的帧间隔�
 
 如果应用程序在接收FIFO满时请求流控制，MAC生成并发送暂停帧。生成帧中的暂停时间的值是ETH-MACFCR中的编程暂停时间值。如果在该暂停时间耗尽之前，接收FIFO在可配置的时隙次数（ETH_MACFCR中的PLT比特）处保持满，则发送第二暂停帧。只要接收的FIFO保持满，则重复该过程。如果在采样时间之前不再满足该条件，则MAC发送具有零暂停时间的暂停帧，以指示远程端接收缓冲器准备好接收新的数据帧。
 
-### Single-packet transmit operation
+<h3 id="Single-packet transmit operation"> Single-packet transmit operation </h3>
 
 发送操作的一般事件顺序如下：
 
-\1.   如果系统有要传输的数据，DMA控制器通过AHB主接口从内存中获取这些数据，并开始将它们转发到FIFO。它继续接收数据，直到传输完帧。
+1. 如果系统有要传输的数据，DMA控制器通过AHB主接口从内存中获取这些数据，并开始将它们转发到FIFO。它继续接收数据，直到传输完帧。
 
-\2.   当超过阈值水平或接收到FIFO中的完整数据包时，帧数据被弹出并驱动到MAC核。DMA继续从FIFO传输数据，直到完整的数据包传输到MAC。当帧完成时，DMA控制器被来自MAC的状态通知。
+2. 当超过阈值水平或接收到FIFO中的完整数据包时，帧数据被弹出并驱动到MAC核。DMA继续从FIFO传输数据，直到完整的数据包传输到MAC。当帧完成时，DMA控制器被来自MAC的状态通知。
 
-### Transmit operation—Two packets in the buffer
+<h3 id="Transmit operation—Two packets in the buffer"> Transmit operation—Two packets in the buffer </h3>
 
-\1.   因为DMA必须在将描述符释放到主机之前更新描述符状态，所以在传输FIFO中最多可以有两个帧。只有在设置了OSF（对第二帧操作）位的情况下，DMA才会获取第二帧并将其放入FIFO。如果未设置此位，则只有在MAC完全处理完该帧并且DMA释放了描述符之后，才从内存中获取下一帧。
+1. 因为DMA必须在将描述符释放到主机之前更新描述符状态，所以在传输FIFO中最多可以有两个帧。只有在设置了OSF（对第二帧操作）位的情况下，DMA才会获取第二帧并将其放入FIFO。如果未设置此位，则只有在MAC完全处理完该帧并且DMA释放了描述符之后，才从内存中获取下一帧。
 
-\2.   如果设置了OSF位，DMA在完成第一帧到FIFO的传输后立即开始获取第二帧。它不会等待状态更新。同时，当第一帧被发送时，第二帧被接收到FIFO中。一旦第一帧被传输并且从MAC接收到状态，它就被推送到DMA。如果DMA已经完成将第二个包发送到FIFO，则第二个传输必须等待第一个包的状态，然后才能继续到下一帧。
+2. 如果设置了OSF位，DMA在完成第一帧到FIFO的传输后立即开始获取第二帧。它不会等待状态更新。同时，当第一帧被发送时，第二帧被接收到FIFO中。一旦第一帧被传输并且从MAC接收到状态，它就被推送到DMA。如果DMA已经完成将第二个包发送到FIFO，则第二个传输必须等待第一个包的状态，然后才能继续到下一帧。
 
-### Retransmission during collision
+<h3 id="Retransmission during collision"> Retransmission during collision </h3>
 
 当帧被传送到MAC时，在半双工模式下MAC线路接口上可能发生冲突事件。然后，MAC将通过在接收到帧结束之前，给出状态来指示重试尝试。然后重新传输被启用，帧从FIFO中再次弹出。在向MAC核弹出超过96个字节后，FIFO控制器释放出空间，并使DMA可以将更多数据推入。这意味着超过此阈值或当MAC核指示延迟碰撞事件时，无法重新传输。
 
-### Transmit FIFO flush operation
+<h3 id="Transmit FIFO flush operation"> Transmit FIFO flush operation </h3>
 
 MAC通过使用操作模式寄存器中的位20来控制软件刷新发送FIFO。刷新操作是立即的，即使Tx FIFO正在向MAC核传输帧，Tx FIFO和相应的指针也被清除到初始状态。这导致MAC发送器中发生下溢事件，并且帧传输被中止。这种帧的状态用下溢和帧刷新事件（TDES0位13和1）标记。在刷新操作期间，没有数据从应用程序（DMA）进入FIFO。传输传输状态字被传输到应用程序以获得刷新的帧数（包括部分帧数）。完全刷新的帧设置了帧刷新状态位（TDES0 13）。当应用程序（DMA）已接受刷新帧的所有状态字时，刷新操作完成。然后清除传输FIFO刷新控制寄存器位。此时，来自应用程序（DMA）的新帧被接受。所有在刷新操作后显示以供传输的数据都将被丢弃，除非它们以SOF标记开头。
 
-### Transmit status word
+<h3 id="Transmit status word"> Transmit status word </h3>
 
 在以太网帧传输到MAC核心的最后，在核心完成帧的传输之后，向应用程序给出传输状态。传输状态的详细描述与TDES0中的位[23:0]相同。如果启用IEEE1588时间戳，则返回特定帧的64位时间戳以及传输状态。
 
-### Transmit checksum offload
+<h3 id="Transmit checksum offload"> Transmit checksum offload </h3>
 
 TCP和UDP等通信协议实现校验和字段，这有助于确定通过网络传输的数据的完整性。由于以太网最广泛的用途是封装TCP和UDP over IP数据报，因此以太网控制器具有传输校验和卸载功能，支持在传输路径中进行校验和计算和插入，并在接收路径中进行错误检测。本节说明传输帧的校验和卸载功能的操作。
 
