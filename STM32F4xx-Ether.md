@@ -5,7 +5,7 @@
 - <a href="#DMA features">DMA features</a>
 - <a href="#PTP features">PTP features</a>
 
-<a href="SMI MII and RMII">SMI, MII and RMII</a>
+<a href="#SMI MII and RMII">SMI, MII and RMII</a>
 - <a href="#Station management interface">Station management interface: SMI</a>
 - <a href="#Media-independent interface">Media-independent interface: MII</a>
 - <a href="#Ethernet main features">Reduced media-independent interface: RMII</a>
@@ -168,28 +168,31 @@ DMA控制器通过AHB主从接口与核心和存储器接口。AHB主接口控�
 
 RMII在MAC和PHY之间实例化。这有助于将MAC的MII转换为RMII。RMII块具有以下特征：
 
-- 支持10 Mbit/s和100 Mbit/s的工作速率
+- 支持10 Mbit/s和100 Mbit/s的工作速率；
 
-- 时钟基准必须加倍至50 MHz
+- 时钟基准必须加倍至50 MHz；
 
-- 相同的时钟参考必须从外部来源到MAC和外部以太网PHY
+- 相同的时钟参考必须从外部来源到MAC和外部以太网PHY；
 
-- 它提供独立的2位宽（dibit）传输和接收数据路径
+- 它提供独立的2位宽（dibit）的传输和接收数据路径。
 
+<img src="https://github.com/laneston/Pictures/blob/master/Post-STM32F4xxP_Ether/Reduced%20media-independent%20interface%20signals.png" width="50%" height="50%">
 
+<h3 id="RMII clock sources"> RMII clock sources </h3>
 
 从外部50MHz时钟对PHY进行时钟，或者使用带有嵌入式PLL的PHY来生成50MHz频率。
 
+<img src="https://github.com/laneston/Pictures/blob/master/Post-STM32F4xxP_Ether/RMII%20clock%20sources.png" width="50%" height="50%">
 
 <h3 id="MII/RMII selection"> MII/RMII selection </h3>
 
 模式MII或RMII是使用SYSCFG_PMC寄存器中的配置位23 MII_RMII_SEL来选择的。当以太网控制器处于重置状态或启用时钟之前，应用程序必须设置MII/RMII模式。
 
-
+<img src="https://github.com/laneston/Pictures/blob/master/Post-STM32F4xxP_Ether/Clock%20scheme.png" width="50%" height="50%">
 
 为了节省一个引脚，两个输入时钟信号RMII_REF_CK和MII_RX_CLK被多路复用在同一个GPIO管脚上。
 
-# MAC 802.3
+<h1 id="MAC 802.3"> MAC 802.3 </h1>
 
 IEEE 802.3局域网（LANs）国际标准采用CSMA/CD（带冲突检测的载波感知多址）作为接入方式。以太网外设由独立接口（MII）的MAC 802.3（媒体访问控制）控制器和专用DMA控制器组成。
 
@@ -197,117 +200,103 @@ MAC区块为以下系列系统实现LAN-CSMA/CD子层：基带和宽带系统的
 
 MAC子层执行与数据链路控制过程相关联的以下功能：
 
-\1.   数据封装（发送和接收）
+1. 数据封装（发送和接收）
 
-Ø 帧（帧边界定界、帧同步）
+- 帧（帧边界定界、帧同步）
 
-Ø 寻址（处理源地址和目标地址）
+- 寻址（处理源地址和目标地址）
 
-Ø 错误检测
+- 错误检测
 
-\2.   媒体访问管理
+2. 媒体访问管理
 
-Ø 中等配置（避免碰撞）
+- 中等配置（避免碰撞）
 
-Ø 争用解决（冲突处理）
+- 争用解决（冲突处理）
 
 基本上，MAC子层有两种工作模式：
 
-\1.   半双工模式：工作站使用CSMA/CD算法争夺物理介质的使用。
+1. 半双工模式：工作站使用CSMA/CD算法争夺物理介质的使用。
 
-\2.   全双工模式：当满足以下所有条件时，无需争用分辨率（不需要CSMA/CD算法）的同时传输和接收：
+2. 全双工模式：当满足以下所有条件时，无需争用资源（不需要CSMA/CD算法）的同时传输和接收：
 
-Ø 支持同时传输和接收的物理介质能力
+- 支持同时传输和接收的物理介质能力
 
-Ø 正好有2个站点连接到LAN
+- 正好有2个站点连接到LAN
 
-Ø 两个站点均配置为全双工操作
+- 两个站点均配置为全双工操作
 
-## MAC 802.3 frame format
+<h3 id="MAC 802.3 frame format"> MAC 802.3 frame format </h3>
 
 MAC块实现IEEE 802.3-2002标准指定的MAC子层和可选MAC控制子层（10/100mbit/s）。
 
-![img](file:///C:/Users/ADMINI~1/AppData/Local/Temp/msohtmlclip1/01/clip_image010.jpg)
+<img src="https://github.com/laneston/Pictures/blob/master/Post-STM32F4xxP_Ether/MAC%20frame%20format.jpg" width="50%" height="50%">
 
-Figure 5MAC frame format
-
-![img](file:///C:/Users/ADMINI~1/AppData/Local/Temp/msohtmlclip1/01/clip_image012.png)
-
-Figure 6Tagged MAC frame format
-
-
-
- 
+<img src="https://github.com/laneston/Pictures/blob/master/Post-STM32F4xxP_Ether/Tagged%20MAC%20frame%20format.png" width="50%" height="50%">
 
 为使用CSMA/CD MAC的数据通信系统指定了两种帧格式：
 
-\1.   基本MAC帧格式
+1. 基本MAC帧格式
 
-\2.   标记的MAC帧格式（基本MAC帧格式的扩展）
+2. 标记的MAC帧格式（基本MAC帧格式的扩展）
 
-图5和图6描述了框架结构（未标记和标记），包括以下字段：
+以上两张图片描述了框架结构（未标记和标记），包括以下字段：
 
-\1.   前导码3：用于同步的7字节字段（PLS电路）十六进制值：55-55-55-55-55-55-55-55-55位模式：01010101 01010101 01010101 01010101 01010101 01010101（从右到左位传输）。
+1. 前导码3：用于同步的7字节字段（PLS电路）十六进制值：55-55-55-55-55-55-55-55-55位模式：01010101 01010101 01010101 01010101 01010101 01010101（从右到左位传输）。
 
-\2.   开始帧分隔符（SFD）：用于指示帧开始的1字节字段。十六进制值：D5位模式：11010101（从右到左位传输）。
+2. 开始帧分隔符（SFD）：用于指示帧开始的1字节字段。十六进制值：D5位模式：11010101（从右到左位传输）。
 
-\3.   目的地和源地址字段：6字节字段，表示目的地和源站地址，如下所示）：
+3. 目的地和源地址字段：6字节字段，表示目的地和源站地址，如下所示）：
 
-![img](file:///C:/Users/ADMINI~1/AppData/Local/Temp/msohtmlclip1/01/clip_image014.png)
+<img src="https://github.com/laneston/Pictures/blob/master/Post-STM32F4xxP_Ether/Address%20field%20format.png" width="50%" height="50%">
 
-Figure 7Address field format
+- 每个地址的长度为48位。
 
-Ø 每个地址的长度为48位。
+- 目标地址字段中的第一个LSB位（I/G）用于指示个人地址（I/G=0）或组地址（I/G=1）。一个组地址能识别无、1个、多个或所有连接到局域网的站点。在源地址中，第一位被保留并重置为0。
 
-Ø 目标地址字段中的第一个LSB位（I/G）用于指示个人地址（I/G=0）或组地址（I/G=1）。一个组地址能识别无、1个、多个或所有连接到局域网的站点。在源地址中，第一位被保留并重置为0。
+- 第二位（U/L）区分本地（U/L=1）或全局（U/L=0）受管地址。对于广播地址，该位也是1。
 
-Ø 第二位（U/L）区分本地（U/L=1）或全局（U/L=0）受管地址。对于广播地址，该位也是1。
-
-Ø 每个地址字段的每个字节必须首先传输最低有效位。
+- 每个地址字段的每个字节必须首先传输最低有效位。
 
 地址指定基于以下类型：
 
-\1.   单个地址：这是与网络上特定站点相关联的物理地址。
+1. 单个地址：这是与网络上特定站点相关联的物理地址。
 
-\2.   组地址。与给定网络上的一个或多个站点关联的多目标地址。多播地址有两种：
+2. 组地址。与给定网络上的一个或多个站点关联的多目标地址。多播地址有两种：
 
-Ø 多播组地址：与一组逻辑相关站点关联的地址。
+- 多播组地址：与一组逻辑相关站点关联的地址。
 
-Ø 广播地址：一个可分辨的预定义多播地址（目标地址字段中的所有1），它始终表示给定LAN上的所有站点。
+- 广播地址：一个可分辨的预定义多播地址（目标地址字段中的所有1），它始终表示给定LAN上的所有站点。
 
-\3.   QTag前缀：在源地址字段和MAC客户端长度/类型字段之间插入的4字节字段。此字段是基本帧（未标记）的扩展，用于获取标记的MAC帧。未标记的MAC帧不包括此字段。标记扩展如下：
+3. QTag前缀：在源地址字段和MAC客户端长度/类型字段之间插入的4字节字段。此字段是基本帧（未标记）的扩展，用于获取标记的MAC帧。未标记的MAC帧不包括此字段。标记扩展如下：
 
-Ø 与类型解释（大于0x0600）一致的2字节常量长度/类型字段值，等于802.1Q标记协议类型（0x8100十六进制）的值。此常量字段用于区分标记的和未标记的MAC帧。
+- 与类型解释（大于0x0600）一致的2字节常量长度/类型字段值，等于802.1Q标记协议类型（0x8100十六进制）的值。此常量字段用于区分标记的和未标记的MAC帧。
 
-Ø 包含标签控制信息字段的2字节字段，细分如下：3位用户优先级、规范格式指示符（CFI）位和12位VLAN标识符。标记的MAC帧的长度由QTag前缀扩展了4个字节。
+- 包含标签控制信息字段的2字节字段，细分如下：3位用户优先级、规范格式指示符（CFI）位和12位VLAN标识符。标记的MAC帧的长度由QTag前缀扩展了4个字节。
 
-\4.   MAC客户端长度/类型：2字节字段，含义不同（互斥），具体取决于其值：
+4. MAC客户端长度/类型：2字节字段，含义不同（互斥），具体取决于其值：
 
-Ø 如果该值小于或等于maxValidFrame（0d1500），则此字段指示802.3帧的后续数据字段中包含的MAC客户端数据字节数（长度解释）。
+- 如果该值小于或等于maxValidFrame（0d1500），则此字段指示802.3帧的后续数据字段中包含的MAC客户端数据字节数（长度解释）。
 
-Ø 如果该值大于或等于MinTypeValue（0d1536 decimal，0x0600），则此字段指示与以太网帧相关的MAC客户端协议（类型解释）的性质。
+- 如果该值大于或等于MinTypeValue（0d1536 decimal，0x0600），则此字段指示与以太网帧相关的MAC客户端协议（类型解释）的性质。
 
 无论对长度/类型字段的解释如何，如果数据字段的长度小于协议正常运行所需的最小值，则在数据字段之后但在FCS（帧检查序列）字段之前添加一个PAD字段。长度/类型字段首先用高阶字节发送和接收。
 
 对于maxValidLength和minTypeValue（不包括边界）之间的长度/类型字段值，不指定MAC子层的行为：MAC子层可以传递它们，也可以不传递它们。
 
-\5.   数据和PAD字段：n字节数据字段。提供了完全的数据透明性，这意味着任何字节值的任意序列都可能出现在数据字段中。PAD的大小（如果有的话）由数据字段的大小决定。数据和PAD字段的最大和最小长度为：
+5. 数据和PAD字段：n字节数据字段。提供了完全的数据透明性，这意味着任何字节值的任意序列都可能出现在数据字段中。PAD的大小（如果有的话）由数据字段的大小决定。数据和PAD字段的最大和最小长度为：
 
-Ø 最大长度=1500字节
+- 最大长度=1500字节
 
-Ø 未标记MAC帧的最小长度=46字节
+- 未标记MAC帧的最小长度=46字节
 
-Ø 标记MAC帧的最小长度=42字节
+- 标记MAC帧的最小长度=42字节
 
 当数据字段长度小于所需的最小值时，将添加PAD字段以匹配最小长度（标记帧为42字节，未标记帧为46字节）。
 
-\6.   帧检查序列：包含循环冗余检查（CRC）值的4字节字段。CRC计算基于以下字段：源地址、目标地址、QTag前缀、长度/类型、LLC数据和PAD（即除前导码、SFD之外的所有字段）。生成多项式如下：
+6. 帧检查序列：包含循环冗余检查（CRC）值的4字节字段。CRC计算基于以下字段：源地址、目标地址、QTag前缀、长度/类型、LLC数据和PAD（即除前导码、SFD之外的所有字段）。生成多项式如下：
 
- 
-
-![img](file:///C:/Users/ADMINI~1/AppData/Local/Temp/msohtmlclip1/01/clip_image016.png)
-
- 
+G(X)=$X^32$
 
 帧的CRC值计算如下：
 
