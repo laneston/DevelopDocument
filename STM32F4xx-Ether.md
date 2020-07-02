@@ -1,3 +1,11 @@
+**目录**
+
+<a href="#Ethernet main features">Ethernet main features</a><br>
+- <a href="#MAC core features">MAC core features</a>
+- <a href="#DMA features">DMA features</a>
+- <a href="#PTP features">PTP features</a>
+- <a href="#MAC core features">MAC core features</a>
+
 <h1 id="Ethernet main features"> Ethernet main features </h1>
 
 以太网外备使STM32F4xx能够根据IEEE 802.3-2002标准通过以太网发送和接收数据。它设提供了一个可配置的、灵活的外围设备，以满足各种应用和客户的需求。它支持到外部物理层（PHY）的两个行业标准接口：IEEE 802.3规范中定义的默认媒体独立接口（MII）和精简媒体独立接口（RMII）。它可以用于许多应用，如交换机、网络接口卡等。
@@ -130,7 +138,7 @@
 
 4. 每秒脉冲输出（产品替代功能输出）。 
 
-<h3 id="SMI MII and RMII"> SMI, MII and RMII </h3>
+<h1 id="SMI MII and RMII"> SMI, MII and RMII </h1>
 
 以太网外围设备由带有专用DMA控制器的MAC 802.3（媒体访问控制）组成。它通过一个选择位（参考SYSCFG_PMC寄存器）支持默认的媒体独立接口（MII）和精简的媒体独立接口（RMII）。
 
@@ -142,8 +150,7 @@ DMA控制器通过AHB主从接口与核心和存储器接口。AHB主接口控�
 
 注：使用以太网时，AHB时钟频率必须至少为25 MHz。
 
-
-
+<img src="https://github.com/laneston/Pictures/blob/master/Post-STM32F4xxP_Ether/ETH%20block%20diagram.jpg" width="50%" height="50%">
 
 <h3 id="Station management interface"> Station management interface: SMI </h3>
 
