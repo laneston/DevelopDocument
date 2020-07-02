@@ -12,11 +12,14 @@
 
 <a href="#MAC frame transmission">MAC frame transmission</a>
 - <a href="#Automatic CRC and pad genratione">Automatic CRC and pad genratione</a>
-- <a href="#Transmit protocol"></a>
-- <a href="#"></a>
-- <a href="#"></a>
-- <a href="#"></a>
-
+- <a href="#Transmit protocol"> Transmit protocol </a>
+- <a href="#Transmit scheduler"> Transmit scheduler </a>
+- <a href="#Transmit flow control"> Transmit flow control </a>
+- <a href="#Transmit operation—Two packets in the buffer">Transmit operation—Two packets in the buffer</a>
+- <a href="#Retransmission during collision"> Retransmission during collision </a>
+- <a href="#Transmit FIFO flush operation"> Transmit FIFO flush operation </a>
+- <a href="#Transmit status word"> Transmit status word </a>
+- <a href="#Transmit checksum offload"> Transmit checksum offload </a>
 
 <h1 id="Ethernet main features"> Ethernet main features </h1>
 
