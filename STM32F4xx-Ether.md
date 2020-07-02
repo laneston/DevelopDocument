@@ -1,15 +1,3 @@
-<head>
-    <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
-    <script type="text/x-mathjax-config">
-        MathJax.Hub.Config({
-            tex2jax: {
-            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
-            inlineMath: [['$','$']]
-            }
-        });
-    </script>
-</head>
-
 **目录**
 
 <a href="#Ethernet main features">Ethernet main features</a><br>
@@ -308,7 +296,7 @@ MAC块实现IEEE 802.3-2002标准指定的MAC子层和可选MAC控制子层（10
 
 6. 帧检查序列：包含循环冗余检查（CRC）值的4字节字段。CRC计算基于以下字段：源地址、目标地址、QTag前缀、长度/类型、LLC数据和PAD（即除前导码、SFD之外的所有字段）。生成多项式如下：
 
-G(X)= $X^32$
+<img src="https://github.com/laneston/Pictures/blob/master/Post-STM32F4xxP_Ether/Formula_20200702A.jpg" width="50%" height="50%">
 
 帧的CRC值计算如下：
 
