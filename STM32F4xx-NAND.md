@@ -196,7 +196,7 @@ xxWAITx≥4+max_wait_assertion_time/HCLK
 
 **Bit 0** 保留，必须保持在重置值
 
-
+--------------------------
 
 
 
