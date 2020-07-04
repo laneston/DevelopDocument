@@ -8,8 +8,8 @@
 - <a href="#Timing diagrams for NAND">Timing diagrams for NAND</a>
 - <a href="#NAND Flash prewait functionality">NAND Flash prewait functionality</a>
 - <a href="#NAND Flash Card control registers">NAND Flash Card control registers</a>
-  1. <a href="#FSMC_PCR">PC Card/NAND Flash control registers 2..4 (FSMC_PCR2..4)</a>
-  2. <a href="#FSMC_SR2">FIFO status and interrupt register 2..4 (FSMC_SR2..4)</a>
+ 1. <a href="#FSMC_PCR">PC Card/NAND Flash control registers 2..4 (FSMC_PCR2..4)</a>
+ 2. <a href="#FSMC_SR2">FIFO status and interrupt register 2..4 (FSMC_SR2..4)</a>
 
  <h1 id="STM32F4xx Part"> STM32F4xx Part</h1>
 
@@ -119,9 +119,49 @@ Address offset: 0xA0000000 + 0x40 + 0x20 * (x – 1), x = 2..4
 
 Reset value: 0x0000 0018
 
-**Bit 0** 保留，必须保持在重置值。
+**Bit 8:7**
 
-**Bit 1 PWAITEN：**  等待功能使能位。
+**Bit 8:7**
+
+**Bit 12:9 TCLR[2:0]:** CLE 到 RE(read enable) 的延迟
+
+跟据AHB时钟(HCLK)循环数量设置从CLE变低到RE变低的时间。
+
+Time is t_clr = (TCLR + SET + 2) × THCLK (这里的THCLK是HCLK的周期时长)
+
+- 0000: 1 HCLK cycle (default)
+- 1111: 16 HCLK cycles
+
+**Bit 8:7** 保留，必须保持在重置值
+
+**Bit 6 ECCEN:** ECC计算逻辑使能位
+
+- 0: ECC logic is disabled and reset (default after reset),
+- 1: ECC logic is enabled.
+
+**Bit 5:4 PWID[1:0]:** 数据总线宽度
+
+定义外部内存设备宽度。
+
+- 00: 8 bits
+- 01: 16 bits (default after reset). This value is mandatory for PC Cards.
+- 10: reserved, do not use
+- 11: reserved, do not use
+
+**Bit 3 PTYP:** Memory 类型
+
+定义连接到相应memory bank的设备类型：
+
+- 0: PC Card, CompactFlash, CF+ or PCMCIA
+- 1: NAND Flash (default after reset)
+
+**Bit 2 PBKEN:** PC Card/NAND Flash memory bank使能位。
+
+使能memory bank。访问使能的memory bank会导致AHB总线上出现错误。
+- 0：对应的memory bank被禁用（复位后默认）
+- 1：启用相应的memory bank
+
+**Bit 1 PWAITEN:**  等待功能使能位
 
 使能PC Card/NAND Flash memory bank的等待功能：
 - 0: disabled
@@ -132,11 +172,17 @@ xxWAITx≥4+max_wait_assertion_time/HCLK
 
 其中max_wait_assertion_time是nOE/nWE或nIORD/nIOWR低时NWAIT进入低位所用的最长时间。
 
-**Bit 2 PBKEN：** PC Card/NAND Flash memory bank使能位。
+**Bit 0** 保留，必须保持在重置值
 
-使能memory bank。访问使能的memory bank会导致AHB总线上出现错误。
-- 0：对应的memory bank被禁用（复位后默认）
-- 1：启用相应的memory bank
+
+
+
+
+
+
+
+
+
 
 <h4 id="FSMC_SR2">FIFO status and interrupt register 2..4 (FSMC_SR2..4)</h4>
 
