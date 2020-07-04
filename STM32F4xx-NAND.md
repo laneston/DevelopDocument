@@ -127,10 +127,12 @@ Reset value: 0x0000 0018
 
 跟据AHB时钟(HCLK)循环数量设置从CLE变低到RE变低的时间。
 
-Time is t_clr = (TCLR + SET + 2) × THCLK (这里的THCLK是HCLK的周期时长)
+计算公式：t_clr = (TCLR + SET + 2) × THCLK (这里的THCLK是HCLK的周期时长)
 
 - 0000: 1 HCLK cycle (default)
 - 1111: 16 HCLK cycles
+
+Note：根据寻址空间，SET是MEMSET或ATTSET。
 
 **Bit 8:7** 保留，必须保持在重置值
 
