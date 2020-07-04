@@ -7,6 +7,8 @@
 - <a href="#Error Correction Code">Error Correction Code (ECC)</a>
 - <a href="#Timing diagrams for NAND">Timing diagrams for NAND</a>
 - <a href="#NAND Flash prewait functionality">NAND Flash prewait functionality</a>
+- <a href="#NAND Flash Card control registers">NAND Flash Card control registers</a>
+  1. <a href="#FSMC_PCR">PC Card/NAND Flash control registers 2..4 (FSMC_PCR2..4)</a>
 
  <h1 id="STM32F4xx Part"> STM32F4xx Part</h1>
 
@@ -106,11 +108,11 @@ FSMC使用FSMC_PATT2定时定义执行写访问，其中ATTHOLD≥7（前提是�
 
 为了克服这种定时限制，可以使用属性内存空间，方法是用满足tWB定时的ATTHOLD值对其定时寄存器进行编程，并将MEMHOLD值保持在最小值。然后，CPU必须将公共内存空间用于所有NAND闪存读写访问，除非将最后一个地址字节写入NAND闪存设备，CPU必须写入属性内存空间。
 
-<h3 id="NAND Flash Card control registers">NAND Flash/PC Card control registers</h3>
+<h3 id="NAND Flash Card control registers">NAND Flash Card control registers</h3>
 
 NAND控制寄存器必须通过字（32位）访问。
 
-**PC Card/NAND Flash control registers 2..4 (FSMC_PCR2..4)**
+<h4 id="FSMC_PCR">PC Card/NAND Flash control registers 2..4 (FSMC_PCR2..4)</h4>
 
 Address offset: 0xA0000000 + 0x40 + 0x20 * (x – 1), x = 2..4
 
