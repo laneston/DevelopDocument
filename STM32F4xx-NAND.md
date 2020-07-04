@@ -9,6 +9,7 @@
 - <a href="#NAND Flash prewait functionality">NAND Flash prewait functionality</a>
 - <a href="#NAND Flash Card control registers">NAND Flash Card control registers</a>
   1. <a href="#FSMC_PCR">PC Card/NAND Flash control registers 2..4 (FSMC_PCR2..4)</a>
+  2. <a href="#FSMC_SR2">FIFO status and interrupt register 2..4 (FSMC_SR2..4)</a>
 
  <h1 id="STM32F4xx Part"> STM32F4xx Part</h1>
 
@@ -137,8 +138,9 @@ xxWAITx≥4+max_wait_assertion_time/HCLK
 - 0：对应的memory bank被禁用（复位后默认）
 - 1：启用相应的memory bank
 
-**Bit 0**
+<h4 id="FSMC_SR2">FIFO status and interrupt register 2..4 (FSMC_SR2..4)</h4>
 
-**Bit 0**
+Address offset: 0xA000 0000 + 0x44 + 0x20 * (x-1), x = 2..4
 
-**Bit 0**
+Reset value: 0x0000 0040
+
