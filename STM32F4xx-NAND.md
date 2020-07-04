@@ -119,11 +119,31 @@ Address offset: 0xA0000000 + 0x40 + 0x20 * (x – 1), x = 2..4
 
 Reset value: 0x0000 0018
 
-**Bit 8:7**
+**Bit 31:20** 保留，必须保持在重置值
 
-**Bit 8:7**
+**Bit 19:17 ECCPS[2:0]:** ECC 页大小
 
-**Bit 12:9 TCLR[2:0]:** CLE 到 RE(read enable) 的延迟
+定义扩展ECC的页大小：
+
+- 000: 256 bytes
+- 001: 512 bytes
+- 010: 1024 bytes
+- 011: 2048 bytes
+- 100: 4096 bytes
+- 101: 8192 bytes
+
+**Bit 16:13 TAR[2:0]:** ALE 到 RE(read enable)的延迟
+
+跟据AHB时钟(HCLK)循环数量设置从ALE变低到RE变低的时间。
+
+计算公式： t_ar = (TAR + SET + 2) × THCLK (这里的THCLK是HCLK的周期时长)
+
+- 0000: 1 HCLK cycle (default)
+- 1111: 16 HCLK cycles
+
+Note：根据寻址空间，SET是MEMSET或ATTSET。
+
+**Bit 12:9 TCLR[2:0]:** CLE 到 RE(read enable)的延迟
 
 跟据AHB时钟(HCLK)循环数量设置从CLE变低到RE变低的时间。
 
