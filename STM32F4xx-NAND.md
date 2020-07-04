@@ -198,17 +198,13 @@ xxWAITx≥4+max_wait_assertion_time/HCLK
 
 --------------------------
 
-
-
-
-
-
-
-
-
 <h4 id="FSMC_SR2">FIFO status and interrupt register 2..4 (FSMC_SR2..4)</h4>
 
 Address offset: 0xA000 0000 + 0x44 + 0x20 * (x-1), x = 2..4
 
 Reset value: 0x0000 0040
+
+该寄存器包含有关FIFO状态和中断的信息。FSMC有一个FIFO，在写入存储器时用来存储来自AHB的多达16个字的数据。这用于快速写入AHB，并将其释放到FSMC以外的外围设备，同时FSMC正在将其FIFO排入内存。出于ECC目的，该寄存器有一个位指示FIFO的状态。ECC是在数据写入内存时计算的，因此为了读取正确的ECC，软件必须等到FIFO为空。
+
+**Bit 31:7** 保留，必须保持在重置值
 
