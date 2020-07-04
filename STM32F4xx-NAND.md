@@ -8,8 +8,8 @@
 - <a href="#Timing diagrams for NAND">Timing diagrams for NAND</a>
 - <a href="#NAND Flash prewait functionality">NAND Flash prewait functionality</a>
 - <a href="#NAND Flash Card control registers">NAND Flash Card control registers</a>
- 1. <a href="#FSMC_PCR">PC Card/NAND Flash control registers 2..4 (FSMC_PCR2..4)</a>
- 2. <a href="#FSMC_SR2">FIFO status and interrupt register 2..4 (FSMC_SR2..4)</a>
+  1. <a href="#FSMC_PCR">PC Card/NAND Flash control registers 2..4 (FSMC_PCR2..4)</a>
+  2. <a href="#FSMC_SR2">FIFO status and interrupt register 2..4 (FSMC_SR2..4)</a>
 
  <h1 id="STM32F4xx Part"> STM32F4xx Part</h1>
 
