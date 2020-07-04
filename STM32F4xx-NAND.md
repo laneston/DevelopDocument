@@ -5,7 +5,8 @@
 - <a href="#NAND Flash operations">NAND Flash operations</a>
 - <a href="#Timing diagrams for NAND">Timing diagrams for NAND</a>
 - <a href="#Error Correction Code">Error Correction Code (ECC)</a>
-
+- <a href="#Timing diagrams for NAND">Timing diagrams for NAND</a>
+- <a href="#NAND Flash prewait functionality">NAND Flash prewait functionality</a>
 
  <h1 id="STM32F4xx Part"> STM32F4xx Part</h1>
 
@@ -87,3 +88,55 @@ FSMC中实现的纠错码（ECC）算法可以对从NAND闪存读写的256、512
 1.	在写入访问期间，NOE保持高（非活动）。在读取访问期间，NWE保持高（非活动）。
 2.	对于写访问，保持相位延迟为（MEMHOLD）x HCLK周期，而对于读访问，保持相位延迟为（MEMHOLD+2）x HCLK周期。
 
+ <h3 id="NAND Flash prewait functionality">NAND Flash prewait functionality</h3>
+
+某些NAND闪存设备要求在写入地址的最后一部分后，控制器等待 R/NB 信号变低。
+
+<img src="https://github.com/laneston/Pictures/blob/master/Post-STM32F4xx_NAND/Access%20to%20non%20%E2%80%98CE%20don%E2%80%99t%20care%E2%80%99%20NAND-Flash.jpg" width="50%" height="50%">
+
+1. CPU在地址 0x7001 0000 写字节 0x00;
+2. CPU在地址 0x7002 0000 写字节 A7-A0;
+3. CPU在地址 0x7002 0000 写字节 A15-A8;
+4. CPU在地址 0x7002 0000 写字节 A23-A16;
+5. CPU在地址 0x7802 0000 写字节 A25-A24;
+
+FSMC使用FSMC_PATT2定时定义执行写访问，其中ATTHOLD≥7（前提是（7+1）×HCLK=112 ns>tWB max）。这保证了在R/NB再次变低或变高之前，NCE保持在较低水平（仅对NCE不关心的NAND闪存请求）。
+
+当需要此功能时，可以通过编程MEMHOLD值来满足tWB定时来保证。然而，对NAND闪存的CPU读取访问具有（MEMHOLD+2）x HCLK周期的保持延迟，而CPU写入访问的保持延迟为（MEMHOLD）x HCLK周期。
+
+为了克服这种定时限制，可以使用属性内存空间，方法是用满足tWB定时的ATTHOLD值对其定时寄存器进行编程，并将MEMHOLD值保持在最小值。然后，CPU必须将公共内存空间用于所有NAND闪存读写访问，除非将最后一个地址字节写入NAND闪存设备，CPU必须写入属性内存空间。
+
+<h3 id="NAND Flash Card control registers">NAND Flash/PC Card control registers</h3>
+
+NAND控制寄存器必须通过字（32位）访问。
+
+**PC Card/NAND Flash control registers 2..4 (FSMC_PCR2..4)**
+
+Address offset: 0xA0000000 + 0x40 + 0x20 * (x – 1), x = 2..4
+
+Reset value: 0x0000 0018
+
+**Bit 0** 保留，必须保持在重置值。
+
+**Bit 1 PWAITEN：**  等待功能使能位。
+
+使能PC Card/NAND Flash memory bank的等待功能：
+- 0: disabled
+- 1: enabled
+
+对于PC卡，当启用等待功能时，MEMWAITx/ATTWAITx/IOWAITx位必须编程为如下值：
+xxWAITx≥4+max_wait_assertion_time/HCLK
+
+其中max_wait_assertion_time是nOE/nWE或nIORD/nIOWR低时NWAIT进入低位所用的最长时间。
+
+**Bit 2 PBKEN：** PC Card/NAND Flash memory bank使能位。
+
+使能memory bank。访问使能的memory bank会导致AHB总线上出现错误。
+- 0：对应的memory bank被禁用（复位后默认）
+- 1：启用相应的memory bank
+
+**Bit 0**
+
+**Bit 0**
+
+**Bit 0**
