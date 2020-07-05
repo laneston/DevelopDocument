@@ -15,6 +15,10 @@
   5. <a href="#FSMC_PIO4">I/O space timing register 4 (FSMC_PIO4)</a>
   6. <a href="#FSMC_ECCR">ECC result registers 2/3 (FSMC_ECCR2/3)</a>
 
+<a href="#MX30LF1G18AC Part">MX30LF1G18AC Part</a><br>
+- <a href="#Bus Operations">Bus Operations</a>
+
+
  <h1 id="STM32F4xx Part"> STM32F4xx Part</h1>
 
 这一部分内容是关于STM32的灵活静态存储控制器（FSMC）在NAND Flash上的应用方式与注意事项。
@@ -385,3 +389,24 @@ Reset value: 0x0000 0000
 |001|2048|ECC[27:0]|
 |100|4096|ECC[29:0]|
 |101|8192|ECC[31:0]|
+
+
+<h1 id="STM32F4xx Part"> STM32F4xx Part</h1>
+
+MX30LF1G18AC由64页（2048+64）字节组成，采用两个NAND字符串结构，每个字符串中有32个串行连接单元。每一页都有额外的64字节用于ECC和其他用途。该设备具有2112字节的片上缓冲区，用于数据加载和访问。每个2K字节的页面有两个区域，一个是2048字节的主区域，另一个是64字节的备用区域。
+
+地址分配有四个地址周期：
+
+| Addresses | IO7 | IO6 | IO5 | IO4 | IO3 | IO2 | IO1 | IO0 |
+|:----------|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+|Column address - 1st cycle|A7|A6|A5|A4|A3|A2|A1|A0|
+|Column address - 2nd cycle|L|L|L|L|A11|A10|A9|A8|
+|Row address - 3rd cycle|A19|A18|A17|A16|A15|A14|A13|A12|
+|Row address - 4th cycle|A27|A26|A25|A24|A23|A22|A21|A20|
+
+MX30xx系列设备是顺序存取存储器，利用多路复用x8或x16输入/输出总线上的命令/地址/数据信号的多路输入。此接口减少了管脚数，并使迁移到其他密度而不改变封装外形成为可能。
+
+1. 地址输入总线操作是为地址输入选择存储器地址；
+2. 令输入总线操作用于向存储器发出命令；
+3. 数据输入总线用于向存储设备输入数据。
+
