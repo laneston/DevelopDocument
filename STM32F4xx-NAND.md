@@ -13,6 +13,7 @@
   3. <a href="#FSMC_PMEM">Common memory space timing register 2..4 (FSMC_PMEM2..4)</a>
   4. <a href="#FSMC_PATT">Attribute memory space timing registers 2..4 (FSMC_PATT2..4)</a>
   5. <a href="#FSMC_PIO4">I/O space timing register 4 (FSMC_PIO4)</a>
+  6. <a href="#FSMC_ECCR">ECC result registers 2/3 (FSMC_ECCR2/3)</a>
 
  <h1 id="STM32F4xx Part"> STM32F4xx Part</h1>
 
@@ -350,6 +351,8 @@ Reset value: 0xFCFC FCFC
 - 1111 1110: 255 HCLK cycles
 - 1111 1111: Reserved
 
+--------------------------
+
 <h4 id="FSMC_PIO4">I/O space timing register 4 (FSMC_PIO4)</h4>
 
 Address offset: 0xA000 0000 + 0xB0
@@ -359,6 +362,8 @@ Reset value: 0xFCFCFCFC
 FSMC_PIO4读/写寄存器包含用于访问16位PC卡/CompactFlash的I/O空间的计时信息。
 
 [与NAND Flash 无关，略过]
+
+--------------------------
 
 <h4 id="FSMC_ECCR">ECC result registers 2/3 (FSMC_ECCR2/3)</h4>
 
