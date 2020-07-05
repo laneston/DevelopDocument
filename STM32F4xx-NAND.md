@@ -9,7 +9,10 @@
 - <a href="#NAND Flash prewait functionality">NAND Flash prewait functionality</a>
 - <a href="#NAND Flash Card control registers">NAND Flash Card control registers</a>
   1. <a href="#FSMC_PCR">PC Card/NAND Flash control registers 2..4 (FSMC_PCR2..4)</a>
-  2. <a href="#FSMC_SR2">FIFO status and interrupt register 2..4 (FSMC_SR2..4)</a>
+  2. <a href="#FSMC_SR">FIFO status and interrupt register 2..4 (FSMC_SR2..4)</a>
+  3. <a href="#FSMC_PMEM">Common memory space timing register 2..4 (FSMC_PMEM2..4)</a>
+  4. <a href="#FSMC_PATT">Attribute memory space timing registers 2..4 (FSMC_PATT2..4)</a>
+  5. <a href="#FSMC_PIO4">I/O space timing register 4 (FSMC_PIO4)</a>
 
  <h1 id="STM32F4xx Part"> STM32F4xx Part</h1>
 
@@ -198,7 +201,7 @@ xxWAITx≥4+max_wait_assertion_time/HCLK
 
 --------------------------
 
-<h4 id="FSMC_SR2">FIFO status and interrupt register 2..4 (FSMC_SR2..4)</h4>
+<h4 id="FSMC_SR">FIFO status and interrupt register 2..4 (FSMC_SR2..4)</h4>
 
 Address offset: 0xA000 0000 + 0x44 + 0x20 * (x-1), x = 2..4
 
@@ -208,3 +211,172 @@ Reset value: 0x0000 0040
 
 **Bit 31:7** 保留，必须保持在重置值
 
+**Bit 6 FEMPT:** FIFO状态为空标志位
+
+提供FIFO状态的只读位
+
+- 0: FIFO 不为空
+- 1: FIFO 为空
+
+**Bit 5 IFEN:** 下降沿中断信号检测启用位
+
+- 0: Interrupt falling edge detection request disabled
+- 1: Interrupt falling edge detection request enabled
+
+**Bit 4 ILEN:** 高级中断检测启用位
+
+- 0: Interrupt high-level detection request disabled
+- 1: Interrupt high-level detection request enabled
+
+**Bit 3 IREN:** 上升沿中断信号检测启用位
+
+- 0: Interrupt rising edge detection request disabled
+- 1: Interrupt rising edge detection request enabled
+
+**Bit 2 IFS:** 下降沿中断标志位
+
+这个标志位硬件置1，需要被软件复位。
+
+- 0: No interrupt falling edge occurred
+- 1: Interrupt falling edge occurred
+
+**Bit 1 ILS:** 高级中断标志位
+
+这个标志位硬件置1，需要被软件复位。
+
+- 0: No Interrupt high-level occurred
+- 1: Interrupt high-level occurred
+
+**Bit 0 IRS:** 上升沿中断标志位
+
+这个标志位硬件置1，需要被软件复位。
+
+- 0: No interrupt rising edge occurred
+- 1: Interrupt rising edge occurred
+
+--------------------------
+
+<h4 id="FSMC_PMEM">Common memory space timing register 2..4 (FSMC_PMEM2..4)</h4>
+
+Address offset: Address: 0xA000 0000 + 0x48 + 0x20 * (x – 1), x = 2..4
+
+Reset value: 0xFCFC FCFC
+
+每个FSMC_PMEMx（x=2..4）读/写寄存器包含PC卡或NAND闪存组x的定时信息，用于访问16位PC卡/CompactFlash的公共存储空间，或访问NAND Flash进行命令、地址写入访问和数据读/写访问。
+
+**Bit 31:24 MEMHIZx[7:0]** 通用存储器x的数据总线 HiZ time
+
+对socket x上的公共内存空间进行NAND flash 写入访问开始后，定义数据总线保存在HiZ中的HCLK时钟周期数。
+
+仅对写入事务有效：
+
+- 0000 0000: 1 HCLK cycle
+- 1111 1110: 255 HCLK cycles
+- 1111 1111: Reserved
+
+**Bit 23:16 MEMHOLDx[7:0]** 通用存储器x的 hold time
+
+对于对公共内存空间的NAND读取访问，在命令被解除(NWE, NOE)之后地址被保持，这些位定义了（HCLK+2）时钟周期数。
+
+对于对公共内存空间的NAND写入访问，在命令被解除(NWE, NOE)之后数据被保持，这些位定义了 HCLK 时钟周期数。
+
+- 0000 0000: Reserved
+- 0000 0001: 1 HCLK cycle for write accesses, 3 HCLK cycles for read accesses
+- 1111 1110: 254 HCLK cycle for write accesses, 256 HCLK cycles for read accesses
+- 1111 1111: Reserved
+
+**Bit 15:8 MEMWAITx[7:0]** 通用存储器x的 wait time
+
+对socket x上的公共内存空间进行NAND读写访问，定义最小HCLK（+1）时钟周期数去使用命令(NWE,NOE)。如果等待信号（NWAIT）在HCLK编程值结束时激活（电平变低），命令激活的持续时间被延长。
+
+- 0000 0000: Reserved
+- 0000 0001: 2 HCLK cycles (+ wait cycle introduced by deasserting NWAIT)
+- 1111 1110: 255 HCLK cycles (+ wait cycle introduced by deasserting NWAIT)
+- 1111 1111: Reserved.
+
+**Bit 15:8 MEMWAITx[7:0]** 通用存储器x的 setup time
+
+在命令激活（NWE，NOE）之前，定义HCLK（）时钟周期数去设置地址，对socket x上公共内存空间的NAND读写访问：
+
+- 0000 0000: 1 HCLK cycle
+- 1111 1110: 255 HCLK cycles
+- 1111 1111: Reserved
+
+--------------------------
+
+<h4 id="FSMC_PATT">Attribute memory space timing registers 2..4 (FSMC_PATT2..4)</h4>
+
+Address offset: 0xA000 0000 + 0x4C + 0x20 * (x – 1), x = 2..4
+
+Reset value: 0xFCFC FCFC
+
+每个FSMC_PATTx（x=2..4）读/写寄存器包含 PC卡/CompactFlash 或 NAND Flash bank x 的定时信息。如果时间必须与以前的访问不同，用于对属性内存空间进行8位访问，以对NAND进行最后一次地址写入访问。
+
+**Bit 31:24 MEMHIZx[7:0]** 属性存储器x的数据总线 HiZ time
+
+对socket x上的公共内存空间进行NAND flash 写入访问开始后，定义数据总线保存在HiZ中的HCLK时钟周期数。
+
+仅对写入事务有效：
+
+- 0000 0000: 1 HCLK cycle
+- 1111 1110: 255 HCLK cycles
+- 1111 1111: Reserved
+
+**Bit 23:16 MEMHOLDx[7:0]** 属性存储器x的 hold time
+
+对于对公共内存空间的NAND读取访问，在命令被解除(NWE, NOE)之后地址被保持，这些位定义了（HCLK+2）时钟周期数。
+
+对于对公共内存空间的NAND写入访问，在命令被解除(NWE, NOE)之后数据被保持，这些位定义了 HCLK 时钟周期数。
+
+- 0000 0000: Reserved
+- 0000 0001: 1 HCLK cycle for write accesses, 3 HCLK cycles for read accesses
+- 1111 1110: 254 HCLK cycle for write accesses, 256 HCLK cycles for read accesses
+- 1111 1111: Reserved
+
+**Bit 15:8 MEMWAITx[7:0]** 属性存储器x的 wait time
+
+对socket x上的公共内存空间进行NAND读写访问，定义最小HCLK（+1）时钟周期数去使用命令(NWE,NOE)。如果等待信号（NWAIT）在HCLK编程值结束时激活（电平变低），命令激活的持续时间被延长。
+
+- 0000 0000: Reserved
+- 0000 0001: 2 HCLK cycles (+ wait cycle introduced by deasserting NWAIT)
+- 1111 1110: 255 HCLK cycles (+ wait cycle introduced by deasserting NWAIT)
+- 1111 1111: Reserved.
+
+**Bit 15:8 MEMWAITx[7:0]** 属性存储器x的 setup time
+
+在命令激活（NWE，NOE）之前，定义HCLK（）时钟周期数去设置地址，对socket x上公共内存空间的NAND读写访问：
+
+- 0000 0000: 1 HCLK cycle
+- 1111 1110: 255 HCLK cycles
+- 1111 1111: Reserved
+
+<h4 id="FSMC_PIO4">I/O space timing register 4 (FSMC_PIO4)</h4>
+
+Address offset: 0xA000 0000 + 0xB0
+
+Reset value: 0xFCFCFCFC
+
+FSMC_PIO4读/写寄存器包含用于访问16位PC卡/CompactFlash的I/O空间的计时信息。
+
+[与NAND Flash 无关，略过]
+
+<h4 id="FSMC_ECCR">ECC result registers 2/3 (FSMC_ECCR2/3)</h4>
+
+Address offset: 0xA000 0000 + 0x54 + 0x20 * (x – 1), x = 2 or 3
+
+Reset value: 0x0000 0000
+
+这些寄存器包含FSMC控制器的ECC计算模块（每个NAND Flash memory bank一个模块）计算的当前纠错代码值。当CPU以正确的地址从 NAND Flash 存储器页读取数据时，ECC计算模块自动处理从 NAND Flash 读写的数据。在X字节读取结束时，CPU必须从FSMC_ECCx寄存器中读取计算出的ECC值，然后验证这些计算出的奇偶校验数据是否与备用区中记录的奇偶校验值相同，以确定某个页是否有效，并在适用的情况下对其进行纠正。FSMC_ECCRx寄存器应在读取后通过将ECCEN位设置为零来清除。要计算新的数据块，ECCEN位必须设置为1。
+
+**Bit 31:0 ECCx[31:0]:** ECC result
+
+此字段提供ECC计算逻辑计算的值。下表描述了这些位字段的内容：
+
+|ECCPS[2:0]|Page size in bytes|ECC bits|
+|:---------|:-----------------|:-------|
+|000|256|ECC[21:0]|
+|001|512|ECC[23:0]|
+|010|1024|ECC[25:0]|
+|001|2048|ECC[27:0]|
+|100|4096|ECC[29:0]|
+|101|8192|ECC[31:0]|
