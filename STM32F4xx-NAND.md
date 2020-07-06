@@ -17,6 +17,8 @@
 
 <a href="#MX30LF1G18AC Part">MX30LF1G18AC Part</a><br>
 - <a href="#Bus Operations">Bus Operations</a>
+- <a href="#MX30LF1G18AC Configuration">MX30LF1G18AC Configuration</a>
+
 
 
  <h1 id="STM32F4xx Part"> STM32F4xx Part</h1>
@@ -61,9 +63,9 @@ NAND闪存设备的典型页面读取操作如下：
 
 FSMC PC卡控制器包括两个纠错码计算硬件块，每个存储库一个。它们用于减少系统软件处理纠错码时主机CPU的工作量。这两个寄存器相同，分别与bank 2和bank 3相关联。因此，没有硬件ECC计算可用于连接到bank 4的存储器。
 
-FSMC中实现的纠错码（ECC）算法可以对从NAND闪存读写的256、512、1024、2048、4096或8192个字节执行1位纠错和2位错误检测。它基于汉明编码算法，包括行和列奇偶校验的计算。
+FSMC中实现的纠错码（ECC）算法可以对从 NAND Flash 读写的256、512、1024、2048、4096或8192个字节执行1位纠错和2位错误检测。它基于汉明编码算法，包括行和列奇偶校验的计算。
 
-每次NAND闪存组激活时，ECC模块监测NAND闪存数据总线和读/写信号（NCE和NWE）。
+每次 NAND Flash 组激活时，ECC模块监测 NAND Flash 数据总线和读/写信号（NCE和NWE）。
 
 功能操作包括：
 
@@ -396,7 +398,7 @@ Reset value: 0x0000 0000
 
 <h1 id="MX30LF1G18AC Part">MX30LF1G18AC Part</h1>
 
-MX30LF1G18AC由64页（2048+64）字节组成，采用两个NAND字符串结构，每个字符串中有32个串行连接单元。每一页都有额外的64字节用于ECC和其他用途。该设备具有2112字节的片上缓冲区，用于数据加载和访问。每个2K字节的页面有两个区域，一个是2048字节的主区域，另一个是64字节的备用区域。
+MX30LF1G18AC 由64页（2048+64）字节组成，采用两个NAND字符串结构，每个字符串中有32个串行连接单元。每一页都有额外的64字节用于ECC和其他用途。该设备具有2112字节的片上缓冲区，用于数据加载和访问。每个2K字节的页面有两个区域，一个是2048字节的主区域，另一个是64字节的备用区域。
 
 地址分配有四个地址周期：
 
@@ -413,3 +415,18 @@ MX30xx系列设备是顺序存取存储器，利用多路复用x8或x16输入/�
 2. 令输入总线操作用于向存储器发出命令；
 3. 数据输入总线用于向存储设备输入数据。
 
+<h3 id="MX30LF1G18AC Configuration">MX30LF1G18AC Configuration</h3>
+
+
+
+<h3 id="Page Read">Page Read</h3>
+
+MX30LF1G18AC 阵列在2112字节的页面中访问。外部读取在R/B#引脚进入就绪状态后开始。读取操作也可以通过写入00h命令并给出地址（列和行地址）并由30h命令确认来启动，MX30LF1G18AC开始内部读取操作，芯片进入忙碌状态州政府芯片准备好后，可以按顺序读出数据。
+
+<img src="https://github.com/laneston/Pictures/blob/master/Post-STM32F4xx_NAND/AC%20Waveforms%20for%20Read%20Cycle.jpg" width="50%" height="50%">
+
+如果主机端使用小于30ns的顺序存取时间（tRC），则数据可以作为EDO模式的波形被锁存在RE的下一个下降沿上。
+
+<img src="https://github.com/laneston/Pictures/blob/master/Post-STM32F4xx_NAND/AC%20Waveforms%20for%20Sequential%20Data%20Out%20Cycle%20(After%20Read)%20-%20EDO%20Mode.jpg" width="50%" height="50%">
+
+为了随机访问同一页中的数据，可以写一个05h命令，然后只写列地址，然后由E0h命令确认。
