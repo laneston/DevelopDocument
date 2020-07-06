@@ -101,7 +101,7 @@ FSMC中实现的纠错码（ECC）算法可以对从NAND闪存读写的256、512
 
  <h3 id="NAND Flash prewait functionality">NAND Flash prewait functionality</h3>
 
-某些NAND闪存设备要求在写入地址的最后一部分后，控制器等待 R/NB 信号变低。
+某些NAND闪存设备要求在写入地址的最后一部分后，控制器等待 R/NB 信号变低。[Busy 信号]
 
 <img src="https://github.com/laneston/Pictures/blob/master/Post-STM32F4xx_NAND/Access%20to%20non%20%E2%80%98CE%20don%E2%80%99t%20care%E2%80%99%20NAND-Flash.jpg" width="50%" height="50%">
 
@@ -111,11 +111,14 @@ FSMC中实现的纠错码（ECC）算法可以对从NAND闪存读写的256、512
 4. CPU在地址 0x7002 0000 写字节 A23-A16;
 5. CPU在地址 0x7802 0000 写字节 A25-A24;
 
-FSMC使用FSMC_PATT2定时定义执行写访问，其中ATTHOLD≥7（前提是（7+1）×HCLK=112 ns>tWB max）。这保证了在R/NB再次变低或变高之前，NCE保持在较低水平（仅对NCE不关心的NAND闪存请求）。
+FSMC使用 FSMC_PATT2 寄存器的定时定义执行写访问，其中ATTHOLD≥7（保证（7+1）×HCLK = 112 ns>tWB max）。这保证了NCE保持在低电平，直到R/NB再次拉低拉高（仅对NCE不关心的 NAND Flash请求）。
 
-当需要此功能时，可以通过编程MEMHOLD值来满足tWB定时来保证。然而，对NAND闪存的CPU读取访问具有（MEMHOLD+2）x HCLK周期的保持延迟，而CPU写入访问的保持延迟为（MEMHOLD）x HCLK周期。
+当需要此功能时，可以通过编程MEMHOLD值来满足tWB定时来保证。
 
-为了克服这种定时限制，可以使用属性内存空间，方法是用满足tWB定时的ATTHOLD值对其定时寄存器进行编程，并将MEMHOLD值保持在最小值。然后，CPU必须将公共内存空间用于所有NAND闪存读写访问，除非将最后一个地址字节写入NAND闪存设备，CPU必须写入属性内存空间。
+
+CPU 对 NAND 的读取访问具有（MEMHOLD+2）x HCLK周期的保持延迟，CPU 对 NAND 写入访问的保持延迟为（MEMHOLD）x HCLK周期。
+
+为了克服这种定时限制，可以使用属性内存空间，方法是用满足 tWB 定时的 ATTHOLD 值对其定时寄存器进行编程，并将MEMHOLD值保持在最小值。然后，CPU必须对所有 NAND 的读写访问使用公共内存空间，除非将最后地址字节写入NAND Flash设备时，CPU 必须将其写入属性内存空间。
 
 <h3 id="NAND Flash Card control registers">NAND Flash Card control registers</h3>
 
