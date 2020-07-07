@@ -54,7 +54,7 @@
 |0x8800 0000|0x8BFF FFFF|Bank 3 - NAND Flash|Attribute|FSMC_PATT3 (0x8C)|
 |0x8000 0000|0x83FF FFFF|Bank 3 - NAND Flash|Common|FSMC_PMEM3 (0x88)|
 |0x7800 0000|0x7BFF FFFF|Bank 2 - NAND Flash|Attribute|FSMC_PATT2 (0x6C)|
-|0x7800 0000|0x7BFF FFFF|Bank 2 - NAND Flash|Common|FSMC_PMEM2 (0x68)|
+|0x7800 0000|0x73FF FFFF|Bank 2 - NAND Flash|Common|FSMC_PMEM2 (0x68)|
 
 对于 NAND Flash memory，通用存储空间和属性存储空间分为三个部分，位于较低的256 KB中：
 
