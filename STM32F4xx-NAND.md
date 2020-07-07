@@ -362,7 +362,7 @@ Reset value: 0xFCFC FCFC
 - 1111 1110: 255 HCLK cycles (+ wait cycle introduced by deasserting NWAIT)
 - 1111 1111: Reserved.
 
-**Bit 15:8 MEMWAITx[7:0]** 通用存储器x的 setup time
+**Bit 15:8 MEMSETx[7:0]** 通用存储器x的 setup time
 
 在命令激活（NWE，NOE）之前，定义HCLK（）时钟周期数去设置地址，对socket x上公共内存空间的NAND读写访问：
 
@@ -410,7 +410,7 @@ Reset value: 0xFCFC FCFC
 - 1111 1110: 255 HCLK cycles (+ wait cycle introduced by deasserting NWAIT)
 - 1111 1111: Reserved.
 
-**Bit 15:8 MEMWAITx[7:0]** 属性存储器x的 setup time
+**Bit 15:8 MEMSETx[7:0]** 属性存储器x的 setup time
 
 在命令激活（NWE，NOE）之前，定义HCLK（）时钟周期数去设置地址，对socket x上公共内存空间的NAND读写访问：
 
