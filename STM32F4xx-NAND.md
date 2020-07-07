@@ -151,7 +151,11 @@ FSMC中实现的纠错码（ECC）算法可以对从 NAND Flash 读写的256、5
 - 属性存储空间定时寄存器：FSMC_PATTx
 - I/O空间定时寄存器：FSMC_PIOx
 
-每个定时配置寄存器包含三个参数，用于定义NAND Flash访问的三个阶段的HCLK循环数，外加一个参数，用于定义在写入时开始驱动数据总线的定时。图表 2显示了公共内存访问的计时参数定义，知道了[属性存储空间]和[I/O存储空间]（仅适用于PC卡）内存空间访问时序是相似的。
+每个定时配置寄存器包含三个参数，用于定义NAND Flash 访问的三个阶段的HCLK循环数，外加一个参数，用于定义在写入访问时，开始驱动数据总线的定时。
+
+公共内存访问，属性存储空间访和I/O存储空间访问（仅适用于PC卡）内存空间访问时序是相似的。
+
+下图显示了参数的定义：
 
 <img src="https://github.com/laneston/Pictures/blob/master/Post-STM32F4xx_NAND/NAND%20controller%20timing%20for%20common%20memory%20access.jpg" width="50%" height="50%">
 
