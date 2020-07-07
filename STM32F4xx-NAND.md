@@ -39,21 +39,37 @@
 
  <h3 id="NAND Flash operations">NAND Flash operations</h3>
 
-NAND闪存设备的命令锁存使能（CLE）和地址锁存使能（ALE）信号由FSMC控制器的一些地址信号驱动。这意味着要向NAND闪存发送命令或地址，CPU必须对其内存空间中的某个地址执行写入操作。
+NAND闪存设备的命令锁存使能（CLE）和地址锁存使能（ALE）信号由 FMC 控制器的一些地址信号驱动。这意味着要向NAND闪存发送命令或地址，CPU必须对其内存空间中的某个地址执行写入操作。
 
 NAND闪存设备的典型页面读取操作如下：
 
-**Part 1：** 根据NAND Flash的特点，通过配置FSMC_PCRx和FSMC_PMEMx寄存器，编程并启用相应的存储库。
+**Step 1：** 
 
-**Part 2：** CPU在公共内存空间执行字节写入，数据字节等于一个闪存命令字节（例如，对于Samsung NAND闪存设备，为0x00）。NAND闪存的CLE输入在写入选通（NWE上的低脉冲）期间处于活动状态，因此写入的字节被解释为NAND闪存的命令。一旦命令被NAND Flash设备锁定，就不需要为下面的页面读取操作写入该命令。
+通过配置寄存器 FSMC_PCRx 和 FSMC_PMEMx，一些设备需要配置FSMC_PATTx，来使能和配置相应的 memory bank。
 
-**Part 3：** CPU可以通过写入所需的字节来发送读操作的起始地址（STARTAD），例如，对于容量较小的设备，四个字节或三个字节。STARTAD[7:0]、STARTAD[15:8]、STARTAD[23:16]和TARTAD[25:24]，用于64 Mb x 8位NAND闪存。NAND闪存设备的ALE输入在写入选通（NWE上的低脉冲）期间处于活动状态，因此写入的字节被解释为读取操作的起始地址。使用属性内存空间可以使用FSMC的不同计时配置，该配置可用于实现一些NAND闪存所需的预等待功能。
+**Step 2：** 
 
-**Part 4：** 控制器等待NAND闪存准备就绪（R/NB信号高）变为活动状态，然后开始新的访问（到同一个或另一个内存库）。等待时，控制器保持NCE信号激活（低）。
+CPU在公共内存空间执行字节写入，数据字节等于一个闪存命令字节（例如，对于Samsung NAND闪存设备，为0x00）。NAND闪存的CLE输入在写入选通（NWE上的低脉冲）期间处于活动状态，因此写入的字节被解释为NAND闪存的命令。一旦命令被NAND闪存设备锁定，就不需要为以下页面读取操作写入该命令。
 
-**Part 5：** 然后，CPU可以在公共内存空间中执行字节读取操作，逐字节读取NAND闪存页（数据字段+备用字段）。
+**Step 3：** 
 
-**Part 6：** 下一个NAND闪存页可以在没有任何CPU命令或地址写入操作的情况下以三种不同的方式读取：
+CPU可以通过写入4个字节的数据发送起始地址（STARTAD）来实行读取操作，对于容量较小的设备，3个或更少的字节足矣。字节写入公共内存空间（common memory ）或属性内存空间（attribute space）。
+
+STARTAD[7:0], STARTAD[16:9],STARTAD[24:17] and finally STARTAD[25](for 64 Mb x 8 bit NAND Flash memories)
+
+NAND Flash 设备的ALE输入在写入（NWE低脉冲）期间处于活动状态，因此写入的字节被解释为读取操作的起始地址。使用属性内存空间可以使用FMC的不同定时配置，该配置可用于实现某些NAND闪存所需的预等待功能。
+
+**Step 4：** 
+
+开始一个新的链接到相同或不同的 memory bank 之前，控制器等待 NAND Flash memory 变成就绪状态（R/NB 信号为高电平）。在等待过程中，控制器保持NCE信号为活跃状态（低电平）
+
+**Step 5：** 
+
+然后，CPU可以在公共内存空间中执行字节读取操作，逐字节读取NAND闪存页（数据字段+备用字段）。
+
+**Step 6：**
+
+下一个NAND闪存页可以在没有任何CPU命令或地址写入操作的情况下以三种不同的方式读取：
 
 1. 只需执行步骤5中描述的操作；
 2. 可以通过在步骤3重新启动操作来访问新的随机地址；
@@ -99,7 +115,7 @@ FSMC中实现的纠错码（ECC）算法可以对从 NAND Flash 读写的256、5
 <img src="https://github.com/laneston/Pictures/blob/master/Post-STM32F4xx_NAND/NAND%20controller%20timing%20for%20common%20memory%20access.jpg" width="50%" height="50%">
 
 1.	在写入访问期间，NOE保持高（非活动）。在读取访问期间，NWE保持高（非活动）。
-2.	对于写访问，保持相位延迟为（MEMHOLD）x HCLK周期，而对于读访问，保持相位延迟为（MEMHOLD+2）x HCLK周期。
+2.	对于写访问，保持阶段延迟为（MEMHOLD）x HCLK周期，而对于读访问，保持阶段延迟为（MEMHOLD+2）x HCLK周期。
 
  <h3 id="NAND Flash prewait functionality">NAND Flash prewait functionality</h3>
 
