@@ -2,6 +2,7 @@
 
 <a href="#STM32F4xx Part">STM32F4xx Part</a><br>
 - <a href="#8-bit NAND Flash">8-bit NAND Flash</a>
+- <a href="#NAND address mapping">NAND address mapping</a>
 - <a href="#NAND Flash operations">NAND Flash operations</a>
 - <a href="#Timing diagrams for NAND">Timing diagrams for NAND</a>
 - <a href="#Error Correction Code">Error Correction Code (ECC)</a>
@@ -37,7 +38,28 @@
 |NWE| O |Write enable|
 |NWAIT/INT[3:2]| I |NAND Flash ready/busy input signal to the FSMC|
 
- <h3 id="NAND Flash operations">NAND Flash operations</h3>
+<h3 id="NAND address mapping">NAND address mapping</h3>
+
+|Start address|End address|FSMC Bank|Memory space|Timing register|
+|:-----------:|:---------:|:--------|:-----------|:--------------|
+|0x8800 0000|0x8BFF FFFF|Bank 3 - NAND Flash|Attribute|FSMC_PATT3 (0x8C)|
+|0x8000 0000|0x83FF FFFF|Bank 3 - NAND Flash|Common|FSMC_PMEM3 (0x88)|
+|0x7800 0000|0x7BFF FFFF|Bank 2 - NAND Flash|Attribute|FSMC_PATT2 (0x6C)|
+|0x7800 0000|0x7BFF FFFF|Bank 2 - NAND Flash|Common|FSMC_PMEM2 (0x68)|
+
+对于 NAND Flash memory，通用存储空间和属性存储空间分为三个部分，位于较低的256 KB中：
+
+- 数据部分：first 64 Kbytes in the common/attribute memory space
+- 命令部分：second 64 Kbytes in the common / attribute memory space
+- 地址部分：next 128 Kbytes in the common / attribute memory space
+
+|Section name|HADDR[17:16]|Address range|
+|:-----------|:----------:|:-----------:|
+|Address section|1X|0x020000-0x03FFFF|
+|Command section|01|0x010000-0x01FFFF|
+|Data section|00|0x000000-0x0FFFF|
+
+<h3 id="NAND Flash operations">NAND Flash operations</h3>
 
 NAND闪存设备的命令锁存使能（CLE）和地址锁存使能（ALE）信号由 FMC 控制器的一些地址信号驱动。这意味着要向NAND闪存发送命令或地址，CPU必须对其内存空间中的某个地址执行写入操作。
 
@@ -119,7 +141,7 @@ FSMC中实现的纠错码（ECC）算法可以对从 NAND Flash 读写的256、5
 
  <h3 id="NAND Flash prewait functionality">NAND Flash prewait functionality</h3>
 
-某些NAND闪存设备要求在写入地址的最后一部分后，控制器等待 R/NB 信号变低。[Busy 信号]
+一些 NAND Flash 设备要求在写入最后一部分地址后，控制器等待 R/NB 信号电平变低[busy signal]。
 
 <img src="https://github.com/laneston/Pictures/blob/master/Post-STM32F4xx_NAND/Access%20to%20non%20%E2%80%98CE%20don%E2%80%99t%20care%E2%80%99%20NAND-Flash.jpg" width="50%" height="50%">
 
@@ -129,12 +151,9 @@ FSMC中实现的纠错码（ECC）算法可以对从 NAND Flash 读写的256、5
 4. CPU在地址 0x7002 0000 写字节 A23-A16;
 5. CPU在地址 0x7802 0000 写字节 A25-A24;
 
-FSMC使用 FSMC_PATT2 寄存器的定时定义执行写访问，其中ATTHOLD≥7（保证（7+1）×HCLK = 112 ns>tWB max）。这保证了NCE保持在低电平，直到R/NB再次拉低拉高（仅对NCE不关心的 NAND Flash请求）。
+FSMC 使用 FSMC_PATT2 寄存器的时序定义执行一次写访问，其中ATTHOLD≥7（保证（7+1）×HCLK = 112 ns>tWB max）。这保证了NCE保持在低电平，直到R/NB再次拉低拉高（为了使NCE不受BUSY信号影响）。
 
-当需要此功能时，可以通过编程MEMHOLD值来满足tWB定时来保证。
-
-
-CPU 对 NAND 的读取访问具有（MEMHOLD+2）x HCLK周期的保持延迟，CPU 对 NAND 写入访问的保持延迟为（MEMHOLD）x HCLK周期。
+当需要此功能时，可以通过设置 MEMHOLD 值来满足 tWB 定时要求。但是，CPU 对 NAND 的读取访问的保持延迟为（MEMHOLD+2）x HCLK cycles，CPU 对 NAND 的写入访问的保持延迟为（MEMHOLD）x HCLK周期。
 
 为了克服这种定时限制，可以使用属性内存空间，方法是用满足 tWB 定时的 ATTHOLD 值对其定时寄存器进行编程，并将MEMHOLD值保持在最小值。然后，CPU必须对所有 NAND 的读写访问使用公共内存空间，除非将最后地址字节写入NAND Flash设备时，CPU 必须将其写入属性内存空间。
 
