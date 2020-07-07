@@ -38,6 +38,14 @@
 |NWE| O |Write enable|
 |NWAIT/INT[3:2]| I |NAND Flash ready/busy input signal to the FSMC|
 
+**Programmable NAND/PC Card access parameters**
+
+|Parameter| Function Access mode| Unit| Min.| Max.|
+|:--------|:--------------------|:----|:----|:----|
+|Memory setup time|Number of clock cycles (HCLK) to set up the address before the command assertion|Read/Write|AHB clock cycle (HCLK)|1|255|
+
+
+
 <h3 id="NAND address mapping">NAND address mapping</h3>
 
 |Start address|End address|FSMC Bank|Memory space|Timing register|
