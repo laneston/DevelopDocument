@@ -76,7 +76,7 @@
 
 **读或写数据：** 要执行读或写数据的操作，只需要读或写Data section部分任意一个地址。
 
-由于NAND闪存会自动递增地址，因此无需增加数据段的地址来访问连续的内存位置。
+由于NAND闪存会自动递增地址，因此无需增加数据段的地址来访问连续的内存位置，即如果访问连续地址的数据段，只需要连续读或写Data section部分的地址即可。
 
 <h3 id="NAND Flash operations">NAND Flash operations</h3>
 
