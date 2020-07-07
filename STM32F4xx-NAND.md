@@ -41,7 +41,7 @@
 **Programmable NAND/PC Card access parameters**
 
 |Parameter| Function| Access mode| Unit| Min.| Max.|
-|:--------|:--------------------|:----|:----|:----|
+|:--------|:--------|:-----------|:----|:----|:----|
 |Memory setup time|在命令生效之前设置地址的时钟周期数（HCLK）|Read/Write|AHB clock cycle (HCLK)|1|255|
 |Memory wait|命令生效的最短持续时钟周期|Read/Write|AHB clock cycle (HCLK)|2|256|
 |Memory hold|在命令失效之后，保持地址以及写入访问的数据的时钟周期数（HCLK）|Read/Write|AHB clock cycle (HCLK)|1|254|
