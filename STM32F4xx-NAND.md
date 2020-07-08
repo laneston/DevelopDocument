@@ -473,13 +473,21 @@ MX30xx系列设备是顺序存取存储器，利用多路复用x8或x16输入/�
 2. 令输入总线操作用于向存储器发出命令；
 3. 数据输入总线用于向存储设备输入数据。
 
-<h3 id="MX30LF1G18AC Configuration">MX30LF1G18AC Configuration</h3>
+<h3 id="Page Program">Page Program</h3>
 
+内存按页来写入，即2112字节。在发出写入命令（80h）并给出行和列地址后，数据将按顺序加载到芯片中。
 
+随机数据输入命令（85h）允许在非顺序地址加载多个数据。数据写入完成后，发出操作确认命令（10h），开始页面写入操作。
+
+块中的页程序操作应该从低地址开始到高地址。页面中的部分程序最多允许4次。但是，对于页面操作的随机数据输入模式，次数不受限制。程序完成状态可由 R/B 引脚或状态寄存器位SR[6]检测。
+
+程序结果显示在芯片状态位（SR[0]）。SR[0]=1表示页面程序不成功，SR[0]=0表示程序操作成功。
+
+在页面程序进行过程中，只接受读取状态寄存器命令和重置命令，其他命令被忽略。
 
 <h3 id="Page Read">Page Read</h3>
 
-MX30LF1G18AC 阵列在2112字节的页面中访问。外部读取在R/B#引脚进入就绪状态后开始。读取操作也可以通过写入00h命令并给出地址（列和行地址）并由30h命令确认来启动，MX30LF1G18AC开始内部读取操作，芯片进入忙碌状态州政府芯片准备好后，可以按顺序读出数据。
+MX30LF1G18AC 阵列在2112字节的页面中访问。外部读取在R/B#引脚进入就绪状态后开始。读取操作也可以通过写入00h命令并给出地址（列和行地址）并由30h命令确认来启动，MX30LF1G18AC开始内部读取操作，芯片进入忙碌状态后，可以按顺序读出数据。
 
 <img src="https://github.com/laneston/Pictures/blob/master/Post-STM32F4xx_NAND/AC%20Waveforms%20for%20Read%20Cycle.jpg" width="50%" height="50%">
 
@@ -488,3 +496,4 @@ MX30LF1G18AC 阵列在2112字节的页面中访问。外部读取在R/B#引脚�
 <img src="https://github.com/laneston/Pictures/blob/master/Post-STM32F4xx_NAND/AC%20Waveforms%20for%20Sequential%20Data%20Out%20Cycle%20(After%20Read)%20-%20EDO%20Mode.jpg" width="50%" height="50%">
 
 为了随机访问同一页中的数据，可以写一个05h命令，然后只写列地址，然后由E0h命令确认。
+
