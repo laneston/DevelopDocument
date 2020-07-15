@@ -17,10 +17,9 @@
   6. <a href="#FSMC_ECCR">ECC result registers 2/3 (FSMC_ECCR2/3)</a>
 
 <a href="#MX30LF1G18AC Part">MX30LF1G18AC Part</a><br>
-- <a href="#Bus Operations">Bus Operations</a>
-- <a href="#MX30LF1G18AC Configuration">MX30LF1G18AC Configuration</a>
-
-
+- <a href="#Timing Configuration">Timing Configuration</a>
+- <a href="#Address Assignment">Address Assignment</a>
+- <a href="#Precautions">Precautions</a>
 
  <h1 id="STM32F4xx Part"> STM32F4xx Part</h1>
 
@@ -458,6 +457,33 @@ Reset value: 0x0000 0000
 
 MX30LF1G18AC 由64页（2048+64）字节组成，采用两个NAND字符串结构，每个字符串中有32个串行连接单元。每一页都有额外的64字节用于ECC和其他用途。该设备具有2112字节的片上缓冲区，用于数据加载和访问，每个2K字节的缓冲页面有两个区域，一个是2048字节的主区域，另一个是64字节的备用区域。
 
+<h3 id="Timing Configuration"> Timing Configuration </h3>
+
+<img src="https://github.com/laneston/Pictures/blob/master/Post-STM32F4xx_NAND/AC%20Waveforms%20for%20Command-Address-Data%20Latch%20Timing.jpg" width="50%" height="50%">
+
+上图是项目所用到的NAND Flash MX30LF1G18AC的 Address Input/Command Input/Data Input时序图。图中标注意义如下：
+
+|symbol|detail|value|
+|:-----|:-----|:---:|
+|tCS|CE# setup time|>15ns|
+|tCLS|CLE setup time|>10ns|
+|tALS|ALE setup time|>10ns|
+|tCH|#CE hold time|>5ns|
+|tCLH|CLE hold time|>5ns|
+|tWP|write pulse time|>10ns|
+|tDS|DATA setup time|>7ns|
+|tDH|DATA hold time|>5ns|
+
+**tCS/tCLS/tALS = (MEMxSET+1) + (MEMxWAIT+1)**
+
+**tCH/tCLH = MEMxHOLD**
+
+**tWP = MEMxWAIT + 1**
+
+**tCS/tCLS/tALS - tWP = MEMxHIZ**
+
+<h3 id="Address Assignment"> Address Assignment </h3>
+
 地址分配有四个地址周期：
 
 | Addresses | IO7 | IO6 | IO5 | IO4 | IO3 | IO2 | IO1 | IO0 |
@@ -473,37 +499,7 @@ MX30xx系列设备是顺序存取存储器，利用多路复用x8或x16输入/�
 2. 令输入总线操作用于向存储器发出命令；
 3. 数据输入总线用于向存储设备输入数据。
 
-<h3 id="ID Read">ID Read</h3>
-
-设备包含标识设备类型和制造商的ID码。ID READ命令序列包括一个命令字节（90h），一个地址字节（00h）。ID 读取命令 90h可以提供一字节的制造商ID（C2h）和一字节的设备ID（F1h）,之后跟随着字节2，字节3和字节4的ID码.
-
-设备支持ONFI参数页读取，通过发送ID读取命令（90h）并跟随一个字节地址（20h），四字节数据返回值4Fh-4Eh-46h-49h，为ASCII码“ONFI”，识别ONFI参数页面。
-
-<h3 id="Page Program">Page Program</h3>
-
-内存按页来写入，即2112字节。在发出写入命令（80h）并给出行和列地址后，数据将按顺序加载到芯片中。随机数据输入命令（85h）允许在非顺序地址加载多个数据。数据写入完成后，发出操作确认命令（10h），开始页面写入操作。
-
-块中的页程序操作应该从低地址开始到高地址。页面中的部分程序最多允许4次。但是，对于页面操作的随机数据输入模式，次数不受限制。程序完成状态可由 R/B 引脚或状态寄存器位SR[6]检测。
-
-程序结果显示在芯片状态位（SR[0]）。SR[0]=1表示页面程序不成功，SR[0]=0表示程序操作成功。
-
-在页面程序进行过程中，只接受读取状态寄存器命令和重置命令，其他命令被忽略。
-
-<img src="https://github.com/laneston/Pictures/blob/master/Post-STM32F4xx_NAND/AC%20Waveforms%20for%20Program%20Operation%20after%20Command%2080H.jpg" width="50%" height="50%">
-
-<h3 id="Page Read">Page Read</h3>
-
-MX30LF1G18AC 阵列在2112字节的页面中访问。外部读取在R/B#引脚进入就绪状态后开始。读取操作也可以通过写入00h命令并给出地址（列和行地址）并由30h命令确认来启动，MX30LF1G18AC开始内部读取操作，芯片进入忙碌状态后，可以按顺序读出数据。
-
-<img src="https://github.com/laneston/Pictures/blob/master/Post-STM32F4xx_NAND/AC%20Waveforms%20for%20Read%20Cycle.jpg" width="50%" height="50%">
-
-如果主机端使用小于30ns的顺序存取时间（tRC），则数据可以作为EDO模式的波形被锁存在RE的下一个下降沿上。
-
-<img src="https://github.com/laneston/Pictures/blob/master/Post-STM32F4xx_NAND/AC%20Waveforms%20for%20Sequential%20Data%20Out%20Cycle%20(After%20Read)%20-%20EDO%20Mode.jpg" width="50%" height="50%">
-
-为了随机访问同一页中的数据，可以写一个05h命令，然后只写列地址，然后由E0h命令确认。
-
-
+<h3 id="Precautions"> Precautions </h3>
 
 当芯片输入电压达到上电水平（Vth=Vcc min.）后，将触发内部上电复位序列。在内部上电复位期间，不接受任何外部命令。有两种方法可以识别内部通电复位序列的终止。
 
@@ -512,8 +508,4 @@ MX30LF1G18AC 阵列在2112字节的页面中访问。外部读取在R/B#引脚�
 
 在通电和断电过程中，建议保持WP#=低，以保护内部数据。
 
-
-
 WP#信号保持低位，存储器将不接受程序/擦除操作。在通电/断电过程中，建议将WP引脚保持在低位。
-
-
