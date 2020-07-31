@@ -1,4 +1,4 @@
-此笔记用于记录算法学习过程中收获的的要点。
+基于《编程珠玑》这本书，此笔记用于记录数据结构与算法学习过程中收获的的要点。
 
 **目录**
 
@@ -6,10 +6,14 @@
 - <a href="#The right question">正确的问题</a>
 - <a href="#Bitmap data structure">位图数据结构</a>
 - <a href="#Multi pass algorithm">多趟算法</a>
+- <a href="#Time-Space compromise and win-win">时间-空间折中与双赢</a>
+- <a href="#Simple design">简单的设计</a>
 
 <h1 id="capture1">第一章</h1>
 
 <h3 id="The right question">正确的问题</h3>
+
+准确的问题描述会使问题的关键暴露出来，使得问题易于解决。
 
 <h3 id="Bitmap data structure">位图数据结构</h3>
 
@@ -23,5 +27,15 @@
 
 <h3 id="Multi pass algorithm">多趟算法</h3>
 
-时间-空间折中与双赢
+因为内存空间的不足，算法多趟输入数据，每次完成一步。
 
+<h3 id="Time-Space compromise and win-win">时间-空间折中与双赢</h3>
+
+编程文献和理论中充斥着时间-空间的折中：通过使用更多的时间，可以减少程序所需的空间。
+
+<h3 id="Simple design">简单的设计</h3>
+
+简单的程序通常比具有相同功能的复杂程序更可靠、更安全、更健壮、更高效，而且易于实现和维护。
+
+
+<h1 id="capture2">第二章</h1>
