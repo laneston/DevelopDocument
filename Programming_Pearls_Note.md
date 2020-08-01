@@ -8,6 +8,7 @@
 - <a href="#Multi pass algorithm">多趟算法</a>
 - <a href="#Time-Space compromise and win-win">时间-空间折中与双赢</a>
 - <a href="#Simple design">简单的设计</a>
+
 <a href="#capture2">第二章</a><br>
 - <a href="#Three questions">三个问题</a>
 - <a href="Binary searchs">三个问题</a>
