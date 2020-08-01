@@ -10,6 +10,7 @@
 - <a href="#Simple design">简单的设计</a>
 <a href="#capture2">第二章</a><br>
 - <a href="#Three questions">三个问题</a>
+- <a href="Binary searchs">三个问题</a>
 
 <h1 id="capture1">第一章</h1>
 
