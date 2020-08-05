@@ -20,6 +20,20 @@
 - <a href="#Transmit FIFO flush operation"> Transmit FIFO flush operation </a>
 - <a href="#Transmit status word"> Transmit status word </a>
 - <a href="#Transmit checksum offload"> Transmit checksum offload </a>
+- <a href="#MII/RMII transmit bit order"> MII/RMII transmit bit order </a>
+
+<a href="#MAC frame transmission">MAC frame transmission</a>
+- <a href="#Receive protocol">Receive protocol</a>
+- <a href="#Receive CRC">Receive CRC: automatic CRC and pad stripping</a>
+- <a href="#Receive checksum offload">Receive checksum offload</a>
+- <a href="#Receive flow control">Receive flow control</a>
+- <a href="#Receive operation multiframe handling">Receive operation multiframe handling</a>
+- <a href="#Error handling">Error handling</a>
+- <a href="#Receive status word">Receive status word</a>
+- <a href="#Frame length interface">Frame length interface</a>
+- <a href="#MII/RMII receive bit order">MII/RMII receive bit order</a>
+
+
 
 <h1 id="Ethernet main features"> Ethernet main features </h1>
 
@@ -428,3 +442,45 @@ TCP和UDP等通信协议实现校验和字段，这有助于确定通过网络�
 **在将帧传输到MAC核心发射机之前，必须确保传输FIFO足够深，能够存储完整的帧。如果FIFO深度小于输入以太网帧大小，则绕过有效负载（TCP/UDP/ICMP）校验和插入功能，仅修改帧的IPv4头校验和，即使在存储和转发模式下也是如此。**
 
 **传输校验和卸载支持两种校验和计算插入。这个可以通过设置CIC位（位28:27 in TDES1，在TDES1:Transmit descriptor Word1中描述）来控制每个帧的校验和。**
+
+*有关IPv4、TCP、UDP、ICMP、IPv6和ICMPv6数据包头规范，请参见IETF规范RFC 791、RFC 793、RFC 768、RFC 792、RFC 2460和RFC 4443。*
+
+<h3 id="MII/RMII transmit bit order"> MII/RMII transmit bit order </h3>
+
+每个来自MII的半字节在RMII上发送出去，一次两位，其传输顺序如下图所示。低阶位（D1和D0）首先传输，然后传输高阶位（D2和D3）。
+
+<img src="https://github.com/laneston/Pictures/blob/master/Post-STM32F4xxP_Ether/Transmission%20bit%20order.jpg" width="50%" height="50%">
+
+下图是RMII的帧传输。
+
+<img src="https://github.com/laneston/Pictures/blob/master/Post-STM32F4xxP_Ether/Frame%20transmission%20in%20MMI%20and%20RMII%20modes.jpg" width="50%" height="50%">
+
+<h1 id="MAC frame reception">MAC frame reception</h1>
+
+MAC接收到的帧会被推入Rx FIFO。一旦这个FIFO超过配置的接收阈值（ETH_DMAOMR寄存器中的RTC），DMA就可以向AHB接口发起预配置的突发传输。
+
+在默认的 **Cut-through** 模式下，当64个字节（在ETH DMAOMR寄存器中配置了RTC位）或一个完整的数据包被接收到FIFO中时，数据被弹出到内存中，并通知DMA Rx FIFO 可用性。一旦DMA启动，向AHB接口传输数据，数据将从FIFO持续传输，直到完整的数据包传输完毕。EOF帧传输完成后，状态字弹出并发送给DMA控制器。
+
+在Rx FIFO 的 **Store-and-forward** 模式（由ETH DMAOMR寄存器中的RSF位配置）中，帧在完全写入接收FIFO之后才被读取。在这种模式下，所有错误帧都会被丢弃（如果内核配置为这样做），这样只读取有效帧并将其转发给应用程序。在 **Cut-through** 模式下，一些错误帧不会被丢弃，因为错误状态是在帧的末尾接收到的，此时该帧的开始已经被FIFO读取。
+
+当MAC在MII上检测到SFD时，将启动接收操作。在继续处理帧之前，核心将去除前导码和SFD。检查头字段是否过滤，FCS字段用于验证帧的CRC。如果地址筛选器失败，则将帧丢弃在核心中。
+
+<h3 id="Receive protocol"> Receive protocol </h3>
+
+<h3 id="Receive CRC"> Receive CRC: automatic CRC and pad stripping </h3>
+
+<h3 id="Receive checksum offload"> Receive checksum offload </h3>
+
+<h3 id="Receive flow control"> Receive flow control </h3>
+
+<h3 id="Receive operation multiframe handling"> Receive operation multiframe handling </h3>
+
+<h3 id="Error handling"> Error handling </h3>
+
+<h3 id="Receive status word"> Receive status word </h3>
+
+<h3 id="Frame length interface"> Frame length interface </h3>
+
+<h3 id="MII/RMII receive bit order"> MII/RMII receive bit order </h3>
+
+
