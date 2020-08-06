@@ -505,6 +505,6 @@ MAC接收到的帧会被推入Rx FIFO。一旦这个FIFO超过配置的接收阈
 
 DMA有独立的发送和接收引擎，以及 CSR[控制/状态寄存器] 空间。发送引擎将数据从系统内存传输到Tx FIFO，而接收引擎将数据从Rx FIFO传输到系统内存。控制器利用描述符有效地将数据从源移动到目的地，而CPU的干预最小。DMA是为面向包的数据传输而设计的，如以太网中的帧。控制器可配置成在帧发送完成，帧接收完成以及其他正常/错误情况下进行中断操作。DMA和STM32F4xx通过两种数据结构进行通信：
 
--  Control and status registers (CSR)
-- -  Descriptor lists and data buffers.[描述符列表和数据缓存]
+ -  Control and status registers (CSR)
+ -  Descriptor lists and data buffers.[描述符列表和数据缓存]
 
