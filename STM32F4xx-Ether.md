@@ -1,6 +1,6 @@
 **目录**
 
-<a href="#Ethernet main features">Ethernet main features</a><br>
+<a href="#Ethernet main features">Ethernet main features</a>
 - <a href="#MAC core features">MAC core features</a>
 - <a href="#DMA features">DMA features</a>
 - <a href="#PTP features">PTP features</a>
@@ -32,6 +32,14 @@
 - <a href="#Receive status word">Receive status word</a>
 - <a href="#Frame length interface">Frame length interface</a>
 - <a href="#MII/RMII receive bit order">MII/RMII receive bit order</a>
+
+<a href="#Ethernet functional description">Ethernet functional description</a>
+- <a href="#Initialization of a transfer using DMA">Initialization of a transfer using DMA</a>
+- <a href="#Host bus burst access">Host bus burst access</a>
+- <a href="#Host data buffer alignment">Host data buffer alignment</a>
+- <a href="#Buffer size calculations">Buffer size calculations</a>
+- <a href="#"></a>
+- <a href="#"></a>
 
 
 
@@ -501,13 +509,18 @@ MAC接收到的帧会被推入Rx FIFO。一旦这个FIFO超过配置的接收阈
 
 [待翻译]
 
+
+
+
+
+
+
 <h1 id="Ethernet functional description">Ethernet functional description: DMA controller operation</h1>
 
 DMA有独立的发送和接收引擎，以及 CSR[控制/状态寄存器] 空间。发送引擎将数据从系统内存传输到Tx FIFO，而接收引擎将数据从Rx FIFO传输到系统内存。控制器利用描述符有效地将数据从源移动到目的地，而CPU的干预最小。DMA是为面向包的数据传输而设计的，如以太网中的帧。控制器可配置成在帧发送完成，帧接收完成以及其他正常/错误情况下进行中断操作。DMA和STM32F4xx通过两种数据结构进行通信：
 
 -  Control and status registers (CSR)
 -  Descriptor lists and data buffers.[描述符列表和数据缓存]
-
 
 DMA发送器从STM32F4xx内存的接收buffer中接收数据帧，从STM32F4xx内存的发送buffer中发送数据帧。驻留在STM32F4xx内存中的描述符充当指向这些buffer的指针。
 
@@ -519,5 +532,55 @@ DMA发送器从STM32F4xx内存的接收buffer中接收数据帧，从STM32F4xx�
 
 数据缓冲区位于主机的物理内存空间中，由整个帧或帧的一部分组成，但不能超过单个帧。缓冲区只包含数据。缓冲区状态在描述符中保持。数据链是指跨越多个数据缓冲区的帧。但是，一个描述符不能跨越多个帧。当检测到帧结束时，DMA跳到下一帧缓冲区。数据链可以呗启用或禁用。描述符环和链结构如下图所示。
 
+<img src="https://github.com/laneston/Pictures/blob/master/Post-STM32F4xxP_Ether/Descriptor%20ring%20and%20chain%20structure.jpg" width="50%" height="50%">
 
+<h3 id="Initialization of a transfer using DMA"> Initialization of a transfer using DMA </h3>
+
+初始化MAC遵循以下步骤：
+
+1. 通过写入ETH_DMABMR寄存器去设置STM32F4xx总线访问参数。
+2. 通过写入ETH_DMAIER寄存器去屏蔽不必要的中断事件。
+3. 软件驱动创建发送-接收描述符列表。然后它同时写入ETH_DMARDLAR和ETH_DMATDLAR寄存器，向DMA提供每个列表的起始地址。
+4. 通过写入MAC寄存器1、2、3来选择所需的筛选选项。
+5. 通过写入MAC ETH_MACCR寄存器去配置和使能发送-接收操作模式。PS和DM位基于自动协商结果设置。
+6. 通过写入ETH_DMAOMR寄存器设置bit 13和bit 1并开始传输和接收。
+7. 发送和接收引擎进入运行状态，并尝试从各自的描述符列表中获取描述符。然后，接收和发送引擎开始处理接收和发送操作。发送和接收过程彼此独立，可以单独启动或停止。
+
+<h3 id="Host bus burst access"> Host bus burst access </h3>
+
+如果配置ETH_DMABMR中的FB位，DMA会尝试在AHB主接口上执行固定长度的突发传输。最大突发长度由PBL字段指示和限制（ETH_DMABMRR[13:8]）。对于要读取的16个字节，接收和发送描述符总是以最大可能的突发大小（受PBL限制）访问。
+
+仅当发送FIFO中有足够的空间来容纳配置的突发或直到帧结束为止的字节数（小于配置的突发长度）时，传输DMA才启动数据传输。DMA指示起始地址和到AHB主接口所需的传输次数。将AHB接口配置为固定长度突发时，它将使用INCR4，INCR8，INCR16和SINGLE事务的最佳组合传输数据。否则（没有固定长度的脉冲串），它将使用INCR（未定义的长度）和SINGLE事务传输数据。
+
+在接收FIFO中有足够用于配置突发的数据，或者当在接收FIFO中检测到帧结束时（当它小于配置的突发长度时），接收DMA才启动数据传输。
+
+DMA指示AHB主接口所需的起始地址和传输数量。当AHB接口配置为固定长度突发时，它使用INCR4、INCR8、INCR16和单个事务的最佳组合来传输数据。
+
+如果在AHB接口上的固定突发结束之前到达帧结束，则执行虚拟传输以完成固定长度突发。否则重置ETH DMABMR中的FB位，它使用INCR（未定义长度）和SINGLE事务传输数据。
+
+当AHB接口被配置为地址对齐节拍，两个DMA引擎都确保AHB发起的第一个突发传输小于或等于配置的PBL的大小。因此，所有后续的节拍从与配置的PBL对齐的地址开始。DMA只能将节拍的地址上调到16（因为PBL>16），因为AHB接口不支持超过INCR16。
+
+<h3 id="Host data buffer alignment"> Host data buffer alignment </h3>
+
+发送和接收数据缓冲区对起始地址对齐没有任何限制。在我们使用32位内存的系统中，缓冲区的起始地址可以与四个字节中的任何一个对齐。然而，DMA总是使用与总线宽度对齐的地址来启动传输，而不需要字节通道的虚拟数据。这通常发生在以太网帧的开始或结束的传输过程中。
+
+- **Example of buffer read:**
+
+如果发送缓冲区地址为0x00000FF2，并且15个字节需要传输，DMA将从地址0x00000FF0读取5个字，但是，当向发送FIFO传输数据时，多余的字节（前两个字节）将被丢弃或忽略。同样，最后一次传输的最后3个字节也将被忽略。DMA总是确保它将完整的32位数据项传输到传输FIFO，除非它是帧的末尾。
+
+- **Example of buffer write:**
+
+如果接收缓冲区地址为0x00000FF2，并且需要传输接收帧的16个字节，则DMA将从地址0x00000FF0写入5个完整的32位数据项。但第一次传输的前2个字节和第3次传输的最后2个字节将有伪数据。
+
+<h3 id="Buffer size calculations">Buffer size calculations </h3>
+
+DMA不更新发送/接收描述符的字段大小。DMA只更新描述符的状态字段（xDES0），驱动必须计算其尺寸。
+
+发送DMA向MAC核心传输精确的字节数（由TDES1中的buffer size字段表示）。如果描述符被标记为第一个（设置了TDES0中的FS位），则DMA将第一次从缓冲区传输的位置标记为起始帧。如果描述符被标记为最后一个（TDES0中的LS位），那么DMA将从该数据缓冲区的最后一次传输的位置标记为结束帧。
+
+接收DMA将数据传输到缓冲区，直到缓冲区已满或接收到帧结束。如果描述符没有标记为最后一个（RDES0中的LS位），则与描述符对应的缓冲区已满，并且缓冲区中的有效数据量由设置描述符的FS位时的缓冲区大小字段减去数据缓冲区指针偏移量来精确指示。当数据缓冲区指针与数据总线宽度对齐时，偏移量为零。如果描述符标记为最后，则缓冲区可能未满（如RDES1中的缓冲区大小所示）。为了计算这个最终缓冲区中的有效数据量，驱动程序必须读取帧长度（RDES0[29:16]中的FL位）并减去该帧中前面的缓冲区大小之和。接收DMA总是用新的描述符传输下一帧的开始。
+
+即使接收缓冲区的起始地址与系统数据总线宽度不一致，系统也应分配一个与系统总线宽度一致的接收缓冲区。
+
+例如，如果系统从地址0x1000开始分配1024字节（1kb）的接收缓冲区，软件可以 *在接收描述符中对缓冲区起始地址进行编程* ，使其具有0x1002偏移量。接收DMA在前两个位置（0x1000和0x1001）使用伪数据将帧写入该缓冲区。实际帧是从位置0x1002写入的。因此，即使由于起始地址偏移，缓冲区大小被编程为1024字节，该缓冲区中的实际有用空间是1022字节。
 
