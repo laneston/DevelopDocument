@@ -38,8 +38,16 @@
 - <a href="#Host bus burst access">Host bus burst access</a>
 - <a href="#Host data buffer alignment">Host data buffer alignment</a>
 - <a href="#Buffer size calculations">Buffer size calculations</a>
-- <a href="#"></a>
-- <a href="#"></a>
+- <a href="#DMA arbiter">DMA arbiter</a>
+- <a href="#Error response to DMA">Error response to DMA</a>
+- <a href="#Tx DMA configuration">Tx DMA configuration</a>
+  - <a href="#default mode">TxDMA operation: default (non-OSF) mode</a>
+  - <a href="#OSF mode">TxDMA operation: OSF mode</a>
+
+
+# 序
+
+
 
 
 
@@ -583,4 +591,71 @@ DMA不更新发送/接收描述符的字段大小。DMA只更新描述符的状�
 即使接收缓冲区的起始地址与系统数据总线宽度不一致，系统也应分配一个与系统总线宽度一致的接收缓冲区。
 
 例如，如果系统从地址0x1000开始分配1024字节（1kb）的接收缓冲区，软件可以 *在接收描述符中对缓冲区起始地址进行编程* ，使其具有0x1002偏移量。接收DMA在前两个位置（0x1000和0x1001）使用伪数据将帧写入该缓冲区。实际帧是从位置0x1002写入的。因此，即使由于起始地址偏移，缓冲区大小被编程为1024字节，该缓冲区中的实际有用空间是1022字节。
+
+<h3 id="DMA arbiter"> DMA arbiter </h3>
+
+DMA内部的仲裁器负责AHB主接口的发送和接收通道访问之间的仲裁。
+
+有两种类型的仲裁：循环仲裁和固定优先级。当选择循环仲裁时（重置ETH_DMABMR中的DA位），当同时发送和接收DMAs请求访问时，仲裁器将按照ETH DMABMR中PM位设置的比率分配数据总线。当设置了DA位时，接收DMA总是比发送DMA具有更高的数据访问优先级。
+
+<h3 id="Error response to DMA"> Error response to DMA </h3>
+
+对于由DMA信道发起的任何数据传输，如果从机应答为错误响应，则DMA停止所有操作并更新状态寄存器（ETH DMASR寄存器）中的错误位和致命总线错误位。DMA控制器只能在软或硬重置外围设备并重新初始化DMA之后才能恢复运行。
+
+<h3 id="Tx DMA configuration"> Tx DMA configuration </h3>
+
+<h5 id="default mode"> TxDMA operation: default (non-OSF) mode </h5>
+
+发送DMA引擎的默认模式如下：
+
+1. 用户在用以太网帧数据设置相应的数据缓冲器之后，设置传输描述符（TDES0-TDES3）并设置自己的位（TDES0[31]）。
+2. 一旦设置了ST位（ETH_DMAOMR寄存器[13]），DMA进入运行状态。
+3. 在运行状态下，DMA轮询发送描述符列表以查找需要传输的帧。轮询开始后，它将以环式或链式顺序描述符工作。如果DMA检测到描述符被标记为CPU拥有，或者如果发生错误情况，则传输被挂起，并且传输缓冲区不可用（ETH_DMASR寄存器[2]）和正常中断摘要（ETH_DMASR寄存器[16]）都被设置。此时，发送引擎进入步骤9。
+4. 如果所获取的描述符被标记为属于DMA（设置了TDES0[31]），则DMA将从所获取的描述符解码发送数据缓冲区地址。
+5. DMA从STM32F4xx存储器中获取传输数据并传输数据。
+6. 如果一个以太网帧存储在多个描述符的数据缓冲区上，DMA将关闭中间描述符并获取下一个描述符。重复步骤3、4和5，直到以太网帧数据传输结束。
+7. 当帧传输完成时，如果为帧启用了IEEE 1588时间戳（如传输状态所示），则时间戳值将写入包含帧结束缓冲区的传输描述符（TDES2和TDES3）。然后将状态信息写入该传输描述符（TDES0）。因为在这个步骤中清除了自己的位，CPU现在拥有这个描述符。如果没有为此帧启用时间戳，DMA不会改变TDES2和TDES3的内容。
+8. 传输中断（ETH_DMASR寄存器[0]）是在完成帧的传输后设置的，该帧在其最后一个描述符中设置了完成时中断（TDES1[31]）。
+9. 在挂起状态下，DMA在接收到发送轮询请求时尝试重新获取描述符（并因此返回到步骤3），下溢中断状态位被清除。
+
+<img src="https://github.com/laneston/Pictures/blob/master/Post-STM32F4xxP_Ether/TxDMA%20operation%20in%20Default%20mode.jpg" width="50%" height="50%">
+
+<h5 id="OSF mode"> TxDMA operation: OSF mode </h5>
+
+在运行状态下，发送过程可以同时获取两个帧，而无需关闭第一帧的状态描述符（如果OSF位设置在ETH DMAOMR寄存器[2]）。当传输过程完成传输第一帧时，它立即轮询第二帧的传输描述符列表。如果第二帧有效，则在写入第一帧的状态信息之前传输该帧。在OSF模式下，运行状态发送DMA按照以下顺序运行：
+
+1. DMA按照TxDMA（默认模式）的步骤1–6中所述进行操作。
+2. 在不关闭前一帧的最后一个描述符的情况下，DMA获取下一个描述符。
+3. 如果DM获取到描述符，DMA将对该描述符中的发送缓冲地址进行解码。如果DMA不拥有描述符，DMA将进入挂起模式并跳到步骤7。
+4. DMA从STM32F4xx内存中获取发送帧并传输该帧，直到结束帧数据被传输，如果该帧被拆分到多个描述符，则关闭中间描述符。
+5. DMA等待前一帧的传输状态和时间戳。当状态可用时，且捕获了这样的时间戳（由状态位指示），DMA将时间戳写入TDES2和TDES3。然后，DMA将状态写入相应的TDES0，用清除的当前的位，从而关闭描述符。如果前一帧没有启用时间戳，DMA不会改变TDES2和TDES3的内容。
+6. 如果启用，则设置传输中断，DMA获取下一个描述符，然后进入步骤3（状态正常时）。如果先前的传输状态显示下溢错误，DMA将进入挂起模式（步骤7）。
+7. 在挂起模式下，如果DMA接收到挂起的状态和时间戳，它会将时间戳（如果对当前帧启用）写入TDES2和TDES3，然后将状态写入相应的TDES0。然后设置相关的中断并返回到挂起模式。
+8. DMA只有在接收到传输轮询请求（ETH_DMATPDR寄存器）后才能退出挂起模式并进入运行状态（根据挂起状态转到步骤1或步骤2）。
+
+<img src="https://github.com/laneston/Pictures/blob/master/Post-STM32F4xxP_Ether/TxDMA%20operation%20in%20OSF%20mode.jpg" width="50%" height="50%">
+
+<h3 id="Transmit frame processing"> Transmit frame processing </h3>
+
+发送DMA要求数据缓冲区包含完整的以太网帧，不包括前导码、pad字节和FCS字段。DA、SA和Type/Len字段包含有效数据。
+
+如果发送描述符指示MAC核心必须禁用CRC或pad插入，则缓冲区必须具有完整的以太网帧（不包括前导码），包括CRC字节。
+
+帧可以是数据链，跨越多个缓冲区。帧必须由首描述符（TDES0[28]）和尾描述符（TDES0[29]）分隔。
+
+当传输开始时，必须在第首描述符中设置（TDES0[28]）。此时，帧数据从存储器缓冲器传输到发送FIFO。同时，如果当前帧的尾描述符（TDES0[29]）被清除，则发送过程尝试获取下一个描述符。发送过程期望被清除在这个描述符中（TDES0[28]）。如果TDES0[29]被清除，则表示这是一个中间缓冲区。如果TDES0[29]被设置，则表示这是的最后一个帧的缓冲区。
+
+在最后一个帧的缓冲区被发送之后，DMA写回最终状态信息到发送描述符0(TDES0)，那有发送描述符0中设置的最后一个字段(TDES0[29])。
+
+此时，如果设置了完成时中断（TDES0[30]），则设置传输中断（在ETH DMASR寄存器[0]），则获取下一个描述符，并重复该过程。
+
+实际帧传输在发送FIFO达到可编程传输阈值（ETH DMAOMR寄存器[16:14]）或FIFO中包含完整帧之后开始。存储转发模式也有一个选项（ETH_DMAOMR寄存器[21]）。当DMA完成帧传输时，描述符被释放（自己的位TDES0[31]被清除）。
+
+<h3 id="Transmit polling suspended"> Transmit polling suspended </h3>
+
+发送轮询可在以下任一情况下暂停：
+
+- DMA检测到描述符被CPU拥有（TDES0[31]=0），并传输缓冲区不可用标志被设置（ETH U DMASR寄存器[2]）。想要继续，程序必须将描述符所有权授予DMA，然后发出 **Poll Demand** 命令。
+
+- 当检测到下溢导致的传输错误时，帧传输被中止；对应的发送描述符0（TDES0）位被设置。如果出现第二种情况，则Abnormal Interrupt Summary（在ETH_DMASR寄存器[15]）和Transmit Underflow（在ETH_DMASR寄存器[5]）两个 bits 被设置，并将信息写入发送描述符0，由此导致挂起。如果DMA由于第一个条件而进入挂起状态，则Abnormal Interrupt Summary（ETH_DMASR寄存器[16]）和Transmit Buffer Unavailable（ETH_DMASR寄存器[2]）两个 bits 被设置。在这两种情况下，发送列表中的位置被保留。保留的位置是DMA关闭的最后一个描述符之后的描述符的位置。在纠正暂停原因后，程序必须明确发出发送Transmit Poll Demand 命令。
 
