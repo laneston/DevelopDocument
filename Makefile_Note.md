@@ -12,7 +12,7 @@ Makefile文件表述的是文件的依赖关系，告诉编译器怎么去编译
 
 **编译**
 
-我们看以下代码：
+我们在Ubuntu平台上用GCC编译器编译以下代码：
 
 ```C
 #include <stdio.h>
@@ -28,7 +28,7 @@ int main(int argv, char argc[])
 
     printf("please input num 2\r\n");
     scanf("%d",&num2);
-    
+
     revalue = num1 + num2;
 
     printf("result is ：%d\r\n", revalue);
@@ -36,4 +36,6 @@ int main(int argv, char argc[])
 }
 ```
 
-
+```
+gcc main.c -o app
+```
