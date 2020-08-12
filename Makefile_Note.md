@@ -12,7 +12,7 @@ Makefile文件表述的是文件的依赖关系，告诉编译器怎么去编译
 
 **编译**
 
-我们在Ubuntu平台上用GCC编译器编译以下代码：
+我们在Ubuntu平台上用 **GCC编译器** 编译以下代码：
 
 ```C
 #include <stdio.h>
@@ -36,6 +36,18 @@ int main(int argv, char argc[])
 }
 ```
 
+在当前文件夹内，使用以下命令：
+
 ```
 gcc main.c -o app
+```
+
+<img src="https://github.com/laneston/Pictures/blob/master/Post-Makefile/20200812144507.jpg" width="50%" height="50%">
+
+我们可以从上图所示，得到一个名为 app 的目标文件。
+
+输入以下命令即可执行目标文件:
+
+```
+./app
 ```
