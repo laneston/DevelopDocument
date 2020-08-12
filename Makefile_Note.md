@@ -108,9 +108,11 @@ gcc main.o -o app
 
 ## Makefile的编写规则
 
+```
 target... : prerequisites ...
 
     command
+```
 
 - **target** 是一个目标文件，可以是中间文件，也可以是执行文件，还可以是一个标签（Label）。
 - **prerequisites** 就是要生成那个 **target** 所需要的文件。
