@@ -16,3 +16,6 @@
 
 本篇文章是翻译ST手册 RM0090 以太网硬件部分，本着学习的目的，笔者会在翻译的过程添加自己的见解。由于篇幅较长，翻译需要分多次完成，主要会围绕当前开源项目的内容进行学习与翻译，其余非主要内容会在文章收尾之后补上。
 
+## <a href="https://github.com/laneston/Note/blob/master/Makefile_Note.md"> STM32F4xx-Ether </a>
+
+这篇文章是关于交叉编译链的学习笔记当中的核心篇目。文章围绕makefile文件的编写方式，向读者讲述如何在ubuntu平台上用GCC交叉编译链编译出STM32F4xx系列的执行文件（bin)。
