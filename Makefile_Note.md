@@ -19,20 +19,18 @@ Makefile文件表述的是文件的依赖关系，告诉编译器怎么去编译
 
 int main(int argv, char argc[])
 {
-    ```
     int num1=0;
     int num2=0;
     int revalue=0;
-    ```
+
     printf("please input num 1\r\n");
-    ```
     scanf("%d",&num1);
-    ```
+
     printf("please input num 2\r\n");
-    ```
     scanf("%d",&num2);
+    
     revalue = num1 + num2;
-    ```
+
     printf("result is ：%d\r\n", revalue);
     return 0;    
 }
