@@ -201,3 +201,43 @@ addition.o: addition.c
 subtraction.o:subtraction.c
 	gcc -c subtraction.c
 ```
+
+<img src="https://github.com/laneston/Pictures/blob/master/Post-Makefile/20200812165429.jpg" width="50%" height="50%">
+
+上图便是编译与运行的结果。
+
+## 依赖关系的初步分析
+
+根据上面的实验，我们已经成功编写了一个 Makefile 文件。下面笔者将会告诉大家这个过程是怎么进行的。
+
+根据上图所示，第一条执行的命令是：gcc -c main.c 
+
+执行这一条命令时，就用到了预处理。因为main.c 文件中有 #include 语法，预处理就是将要包含(include)的文件插入原文件中。 在例子中就是 addition.h subtraction.h文件。
+
+第二第三条执行的命令都是编译加法与减法两条子函数所在的文件。
+
+第四条执行的命令是将生成的中间文件 main.o addition.o subtraction.o 链接目标文件 app
+
+到此为止，Makefile 文件就做了这几件事。
+
+## Makefile文件的变换
+
+之前说到，预处理就是将要包含(include)的文件插入原文件中，例子中就是 addition.h subtraction.h文件。其实我们可以省下这个预处理，只需要把文件依赖关系写在 Makefile 文件中就可以。
+
+```
+app: main.o addition.o subtraction.o
+	gcc -o app main.o addition.o subtraction.o
+
+main.o: main.c addition.h subtraction.h
+	gcc -c main.c
+
+addition.o: addition.c
+	gcc -c addition.c
+
+subtraction.o:subtraction.c
+	gcc -c subtraction.c
+```
+
+这样也能成功编译，但可能会有警告，因为 addition.h subtraction.h 只声明了函数，编译器因为找不到函数的定义而产生隐形声明警告。
+
+到此为止，我们已经基本学会些 Makefile 了，接下来我们将会进一步学习如何在复杂的情况中应用 Makefile 。
