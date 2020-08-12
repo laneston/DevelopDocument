@@ -117,3 +117,87 @@ target... : prerequisites ...
 - **target** 是一个目标文件，可以是中间文件，也可以是执行文件，还可以是一个标签（Label）。
 - **prerequisites** 就是要生成那个 **target** 所需要的文件。
 - **command** 是 make 需要执行的命令（任意的Shell命令）。需要注意的是，命令要以一个Tab键作为开头。
+
+## Makefile的基本应用
+
+以下我们将会用一个例子来展示 Makefile 的应用。
+
+**文件1: main.c**
+
+```
+#include <stdio.h>
+#include "addition.h"
+#include "subtraction.h"
+
+int main(int argv, char argc[])
+{
+    char symbol;
+    int num1=0;
+    int num2=0;
+    int result;
+
+    printf("please input the operation symbol\r\n");
+    scanf("%c", &symbol);
+
+    printf("please input num 1\r\n");
+    scanf("%d",&num1);
+
+    printf("please input num 2\r\n");
+    scanf("%d",&num2);
+
+    switch(symbol)
+    {
+        case '+':
+            result = addition(num1, num2);
+            break;
+        case '-':
+            result = subtraction(num1, num2);
+            break;
+        default:
+            break;
+    }
+    printf("the result is:%d\r\n", result);
+
+    return 0;
+}
+```
+
+**文件2: addition.c**
+
+```
+int addition(int a, int b)
+{
+    return (a+b);
+}
+```
+
+**文件3: subtraction.c**
+
+```
+int subtraction(int a, int b)
+{
+    return (a-b);
+}
+```
+
+以上有3个文件，文件内容浅显易懂，所以不再说明。现在我们分析3者的依赖关系，然后写对应的 Makefile 文件。
+
+文件1为主函数，主函数中有两个子函数，分别是加法运算函数 addition(int a, int b) 和减法运算函数 subtraction(int a, int b)。所以我们得知，要生成目标文件 app，除了需要 main.o 文件，还需要依赖 addition.o 和 subtraction.o 两个文件。
+
+而生成 main.o 文件需要依赖 main.c文件；而生成 subtraction.o 文件需要依赖 subtraction.c文件；而生成 addition.o 文件需要依赖 addition.c文件。
+
+由此我们可以得出 Makefile 的书写方式：
+
+```
+app: main.o addition.o subtraction.o
+	gcc -o app main.o addition.o subtraction.o
+
+main.o: main.c
+	gcc -c main.c
+
+addition.o: addition.c
+	gcc -c addition.c
+
+subtraction.o:subtraction.c
+	gcc -c subtraction.c
+```
