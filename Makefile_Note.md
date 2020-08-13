@@ -365,11 +365,15 @@ clean :
 ## 通配符的灵活用法
 
 在进一步解析其中的使用方式之前，我们先来了解以下几个常用概念：
+
+常用函数：
  
 - $(subst from, to, text)  把字串 text 中的 from 字符串替换成 to。
 - $(patsubst pattern, replacement, text)  查找 text 中的单词（单词以“空格”、“Tab”或“回车”“换行”分隔）是否符合模式 pattern ，如果匹配的话，则以 replacement 替换。这里， pattern 可以包括通配符“%”，表示任意长度的字串。如果  replacement 中也包含“%”，那么， replacement 中的这个“%”将是 pattern 中的那个“%”所代表的字串。（可以用“\”来转义，以“\%”来表示真实含义的“%”字符）
 - $(notdir names)  从文件名序列 names 中取出非目录部分。非目录部分是指最后一个反斜杠（“/”）之后的部分。
 - $(wildcard PATTERN) 获取匹配 PATTERN 的所有对象。
+
+常用通配符：
 
 - $@：目标的名字
 - $^：构造所需文件列表所有所有文件的名字
