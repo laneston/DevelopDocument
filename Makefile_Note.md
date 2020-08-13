@@ -391,7 +391,13 @@ $(<function> <arguments>)
 
 **2. 常用函数**
 
-$(subst <from>,<to>,<text>)
+**$(subst <from>, <to>, <text>)**
+
+名称：字符串替换函数——subst。
+
+功能：把字串<text>中的<from>字符串替换成<to>。
+
+返回：函数返回被替换过后的字符串。
 
 
 
