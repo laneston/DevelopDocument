@@ -1,3 +1,5 @@
+**[top](目录)**
+
 本编文章是关于交叉编译链的学习笔记当中的核心篇目。文章围绕makefile文件的编写方式，向读者讲述如何在ubuntu平台上用GCC交叉编译链编译出STM32F4xx系列的执行文件（bin)。
 
 # 什么是Makefile
@@ -244,4 +246,87 @@ subtraction.o:subtraction.c
 
 # Makefile还可以做什么
 
-当一个工程项目十分庞大，所涉及的文件数目也会因此递增，并且伴随着频繁的文件增减，Makefile文件也需要跟着频繁修改，这会令写 Makefile 变得十分困难，而且容易出错。有没有什么办法可以写一个“万能”的 Makefile 文件，从而一劳永逸呢？答案是可以的！在一个工程模板不变的情况下，是可以做到编写一个通用 Makefile 的。
+当一个工程项目十分庞大，所涉及的文件数目也会因此递增，并且伴随着频繁的文件增减，Makefile文件也需要跟着频繁修改，这会令写 Makefile 变得十分困难，而且容易出错。有没有什么办法可以写一个“万能”的 Makefile 文件，从而一劳永逸呢？答案是肯定的！在一个工程模板不变的情况下，是可以做到编写一个通用 Makefile 的。
+
+## Makefile中使用变量
+
+我们可以看到 main.o addition.o subtraction.o 这几个语句出现了两次，可以用一个变量来表示这几个语句，以防在复杂的 Makefile 文件中漏了增加某个语句。
+
+```
+objects = main.o addition.o subtraction.o
+
+app:  $(objects)
+	gcc -o app $(objects)
+
+main.o: main.c
+	gcc -c main.c
+
+addition.o: addition.c
+	gcc -c addition.c
+
+subtraction.o:subtraction.c
+	gcc -c subtraction.c
+```
+
+以上例子当中，我们看到用 objects 这个变量来表示 main.o addition.o subtraction.o 这几个文件。在调用的时候需要用 $() 来包括住变量。
+
+## 让make自动推导
+
+GNU的 make 很强大，它可以自动推导文件以及文件依赖关系后面的命令，于是我们就没必要去在每一个[.o]文件后都写上类似的命令，因为，我们的 make 会自动识别，并自己推导命令。
+
+```
+objects = main.o addition.o subtraction.o
+
+app:  $(objects)
+	gcc -o app $(objects)
+
+main.o: main.c
+
+addition.o: addition.c
+
+subtraction.o:subtraction.c
+```
+
+由上面的例子可见，我们少写了几句编译命令，但 Make 还是能帮我们去推导出 .o 的依赖文件。这就是 make 的隐形规则。
+
+## 清空编译文件
+
+我们发现每次编译的过程中都会产生一大堆中间文件，这令人感到杂乱，每个 Makefile 中都应该写一个清空目标文件（.o和执行文件）的规则，这不仅便于重编译，也很利于保持文件的清洁。
+
+```
+objects = main.o addition.o subtraction.o
+
+app:  $(objects)
+	gcc -o app $(objects)
+
+main.o: main.c
+
+addition.o: addition.c
+
+subtraction.o:subtraction.c
+
+.PHONY : clean
+clean :
+    -rm  $(objects)
+```
+
+输入命令行：
+
+```
+make clean
+```
+
+就可以清除对应的文件了。
+
+.PHONY 意思表示 clean 是一个“伪目标”，在rm命令前面加了一个小减号的意思就是，也许某些文件出现问题，但不要管，继续做后面的事。clean 的规则不要放在文件的开头，不然，这就会变成make 的默认目标，一般我们都会放在文件结尾处。
+
+# Makefile的进阶应用
+
+虽然可以用一个变量来减少 Makefile 的复杂度，也可以用一些隐式规则来简化 Makefile 的编写，但在一些大型的工程当中，这个技巧的使用带来的收益仍旧微乎其微。我们可以联想到提起过的 keil_v5 编译器，是否可以做到像 keil_v5 编译器那样，可以指定文件路径，让工具自动去查找和关系文件？我们先不要着急寻找这个答案，在此之前，还需要进一步了解相关的知识。
+
+## make的工作方式
+
+
+
+
+
