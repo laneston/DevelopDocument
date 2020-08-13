@@ -40,7 +40,7 @@ int main(int argv, char argc[])
 gcc main.c -o app
 ```
 
-<img src="https://github.com/laneston/Pictures/blob/master/Post-Makefile/20200812144507.jpg" width="50%" height="50%">
+<img src="https://github.com/laneston/Pictures/blob/master/Post-Makefile/20200812144507.jpg" width="100%" height="100%">
 
 我们可以从上图所示，得到一个名为 app 的目标文件。
 
@@ -76,7 +76,7 @@ gcc main.c -o app
 gcc -S main.c
 ```
 
-<img src="https://github.com/laneston/Pictures/blob/master/Post-Makefile/20200812152754.jpg" width="50%" height="50%">
+<img src="https://github.com/laneston/Pictures/blob/master/Post-Makefile/20200812152754.jpg" width="100%" height="100%">
 
 以上我们可以看到，文件夹中多了一个 .s 文件，这是汇编格式的文件。
 
@@ -202,7 +202,7 @@ subtraction.o:subtraction.c
 	gcc -c subtraction.c
 ```
 
-<img src="https://github.com/laneston/Pictures/blob/master/Post-Makefile/20200812165429.jpg" width="50%" height="50%">
+<img src="https://github.com/laneston/Pictures/blob/master/Post-Makefile/20200812165429.jpg" width="100%" height="100%">
 
 上图便是编译与运行的结果。
 
