@@ -1,4 +1,5 @@
-本编文章是关于交叉编译链的学习笔记当中的核心篇目。文章围绕makefile文件的编写方式，向读者讲述如何在ubuntu平台上用GCC交叉编译链编译出STM32F4xx系列的执行文件（bin)。
+本编文章是关于交叉编译链的学习笔记当中的核心篇目。文章围绕makefile文件的编写方式，向读者讲述如何在ubuntu平台上用交叉编译链编译出 STM32F4xx 系列 MCU 的执行文件。文章核心在于讲述 Makefile 的原理及应用方式，对比于嵌入式可视编译器 keil_v5 有什么共同点，编译思维是怎样产生的，由此来完成一个模板项目 <a href="https://github.com/laneston/STM32_RTOS_GUN"> STM32_RTOS_GUN </a> 的编译工作。
+
 
 # 什么是Makefile
 
@@ -338,8 +339,6 @@ make 支持三各通配符：*，? 和 [...]
 
 objects = main.o addition.o subtraction.o
 
-变为：
-
 objects = *.o
 
 其实以上两条式子并不是等价的，因为在 Makefile 规则中，通配符会被自动展开。但在变量的定义和函数引用时，通配符将失效。这种情况下如果需要通配符有效，就需要使用函数“wildcard”，它的用法是：$(wildcard PATTERN...) 。
@@ -367,8 +366,10 @@ clean :
 
 在进一步解析其中的使用方式之前，我们先来了解以下几个常用概念：
  
-- wildcard: 扩展通配符
-- patsubst：替换通配符
+- $(subst from, to, text)  把字串 text 中的 from 字符串替换成 to。
+- $(patsubst pattern, replacement, text)  查找 text 中的单词（单词以“空格”、“Tab”或“回车”“换行”分隔）是否符合模式 pattern ，如果匹配的话，则以 replacement 替换。这里， pattern 可以包括通配符“%”，表示任意长度的字串。如果  replacement 中也包含“%”，那么， replacement 中的这个“%”将是 pattern 中的那个“%”所代表的字串。（可以用“\”来转义，以“\%”来表示真实含义的“%”字符）
+- $(notdir names)  从文件名序列 names 中取出非目录部分。非目录部分是指最后一个反斜杠（“/”）之后的部分。
+- $(wildcard PATTERN) 获取匹配 PATTERN 的所有对象。
 
 - $@：目标的名字
 - $^：构造所需文件列表所有所有文件的名字
@@ -378,27 +379,6 @@ clean :
 **%和*的区别：**
 
 %为Makefile规则通配符，一般用于规则描述；通配符*则不具备上述功能，尤其是在Makefile，当变量定义或者函数调用时，该通配符的展开功能就失效了，即不能正常使用了，此时需要借助 wildcard 函数。二者应用范围不同。
-
-## Makefile常用函数
-
-**1. 函数的使用方式**
-
-我们由以上例子便可看出函数的的使用格式如下：
-
-```
-$(<function> <arguments>)
-```
-
-**2. 常用函数**
-
-**$(subst <from>, <to>, <text>)**
-
-名称：字符串替换函数——subst。
-
-功能：把字串<text>中的<from>字符串替换成<to>。
-
-返回：函数返回被替换过后的字符串。
-
 
 
 
