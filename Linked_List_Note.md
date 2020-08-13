@@ -4,5 +4,6 @@
 
 **百度百科中定义：** 链表是一种物理存储单元上非连续、非顺序的存储结构，数据元素的逻辑顺序是通过链表中的指针链接次序实现的。
 
-
 <img src="https://github.com/laneston/Pictures/blob/master/Post-Linked-List_Note/singly%20linked%20list.jpg" width="50%" height="50%">
+
+我们常见的链表拓扑图如上所示，这是一个单向链表
