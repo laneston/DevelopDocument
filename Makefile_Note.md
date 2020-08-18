@@ -1,5 +1,4 @@
-本编文章是关于交叉编译链的学习笔记当中的核心篇目。文章围绕makefile文件的编写方式，向读者讲述如何在ubuntu平台上用交叉编译链编译出 STM32F4xx 系列 MCU 的执行文件。文章核心在于讲述 Makefile 的原理及应用方式，对比于嵌入式可视编译器 keil_v5 有什么共同点，编译思维是怎样产生的，由此来完成一个模板项目 <a href="https://github.com/laneston/STM32_RTOS_GUN"> STM32_RTOS_GUN </a> 的编译工作。
-
+本编文章是关于交叉编译链的学习笔记当中的核心篇目。文章围绕makefile文件的编写方式，从零开始，向读者讲述如何在ubuntu平台上用交叉编译链 arm-none-eabi- 编译出 STM32F4xx 系列 MCU 的执行文件。文章核心在于讲述 Makefile 的原理及应用方式，对比于嵌入式可视编译器 keil_v5 有什么共同点，编译思维是怎样产生的，由此来完成一个简单项目 <a href="https://github.com/laneston/STM32F4xx_LED-Makefile"> STM32F4xx_LED-Makefile </a> 的编译工作。
 
 # 什么是Makefile
 
@@ -286,7 +285,7 @@ addition.o: addition.c
 subtraction.o:subtraction.c
 ```
 
-由上面的例子可见，我们少写了几句编译命令，但 Make 还是能帮我们去推导出 .o 的依赖文件。这就是 make 的隐形规则。
+由上面的例子可见，我们少写了几句编译命令，但 Make 还是能帮我们去推导出 .o 的依赖文件。这就是 make 的隐性规则。
 
 ## 清空编译文件
 
