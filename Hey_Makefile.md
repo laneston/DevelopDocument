@@ -34,7 +34,54 @@ Makefile文件表述的是文件的依赖关系，告诉编译器怎么去编译
 gcc -S main.c
 ```
 
-### 创建单目录工程
+## 编译和链接
+
+编译和链接是获得目标文件的主要方式，在常见的stm32f1xx/stm32f4xx系列的编程任务中，我们可能会用到keil/MDK这个工具，当点击其中的build按键时，我们就能在输出文件夹中获得bin（二进制）或者HEX（十六进制）文件。之后，我们就可以通过MDK自带的烧录工具，使用JLink/STLink将目标文件烧录到芯片的Flash当中，抑或是通过ISP工具烧录到芯片的Flash当中。
+
+在这个过程当中，编译器已经帮我们执行了编译和链接两个步骤。以下我会通过简单的例子说明这一个过程是如何在编译链上体现的。
+
+创建一个名为 main.c 的文件，并写入以下代码：
+
+```C
+#include <stdio.h>
+
+int main(int argv, char argc[])
+{
+    int num1=0;
+    int num2=0;
+    int revalue=0;
+
+    printf("please input num 1\r\n");
+    scanf("%d",&num1);
+
+    printf("please input num 2\r\n");
+    scanf("%d",&num2);
+
+    revalue = num1 + num2;
+
+    printf("result is ：%d\r\n", revalue);
+    return 0;
+}
+```
+
+我们在Ubuntu平台上用 **GCC编译器** 编译以上代码：在当前文件夹内，使用以下命令：
+
+```
+gcc main.c -o app
+```
+
+<img src="https://github.com/laneston/Pictures/blob/master/Post-Makefile/20200812144507.jpg" width="50%" height="50%">
+
+我们可以从上图所示，得到一个名为 app 的目标文件。
+
+输入以下命令即可执行目标文件:
+
+```
+./app
+```
+以上过程便是我们说的编译与链接。
+
+## 创建单目录工程
 
 创建一个名为 Test_A 的文件夹，当然，也可以是其他名字。然后在里面创建以下文件：
 
@@ -164,7 +211,7 @@ float subtraction(float a, float b)
 
 可以看出，这几个文件构成的工程是一个做2元加减乘除的运算。
 
-### 编写Makefile文件
+## 编写Makefile文件
 
 
 文件1为主函数，主函数中有4个子函数，分别是加法运算函数 addition(int a, int b) ，减法运算函数 subtraction(int a, int b)，乘法函数和除法函数。所以我们得知，要生成目标文件 app，除了需要 main.o 文件，还需要依赖 addition.o subtraction.o multiplication.o division.o 4个文件。而生成 main.o 文件需要依赖 main.c文件；而生成 subtraction.o 文件需要依赖 subtraction.c文件；而生成 addition.o 文件需要依赖 addition.c文件。如此类推，我们可以得出 Makefile 的书写方式。
@@ -197,7 +244,7 @@ clean :
 	-rm main.o addition.o subtraction.o multiplication.o division.o app
 ```
 
-### Makefile的编写规则
+## Makefile的编写规则
 
 ```
 target... : prerequisites ...
@@ -250,7 +297,7 @@ clean :
 
 上面的例子中，我们用 OBJ 来代替了 main.o addition.o subtraction.o multiplication.o division.o 这一长串文件。注意的是，在引用变量时，需要用 $() 来包括住变量。
 
-### Makefile的静态模式
+## Makefile的静态模式
 
 我们不用纠结什么是静态模式，不然容易被这个名称迷惑住。现在我们脑子里就是想着怎么将这个 Makefile 文件继续化简，使得以后要往这个工程里面继续添加时，修改的内容达到最小化。乃至可以写个工程模板，即便往后继续向其中的文件夹添加文件，也无需修改 Makefile 文件。
 
@@ -281,7 +328,7 @@ main.o 文件依赖的是 main.c 文件，以及文件里面包含的 addition.h
 那 gcc -c $< -o $@ 又是怎么回事呢？有朋友又问了。这个东西说来话长，以下请听我细细道来。
 
 
-### 通配符
+## 通配符
 
 - $@：代表的是目标文件
 - $^：代表的是内容中所有的依赖文件
@@ -303,7 +350,7 @@ main.o 文件依赖的是 main.c 文件，以及文件里面包含的 addition.h
 
 看到这里，很多朋友都应该大呼厉害，当然指的是设计规则的人。又有人会问，能不能把 OBJ = main.o addition.o subtraction.o multiplication.o division.o 这一串东西也去掉啊，让 make 自己在文件夹里找依赖文件，这样我们以后往文件夹里添加文件也不用修改任何东西了。听到这句话，我又是反手就是一个……赞。这个当然可以啦！
 
-### 函数
+## 函数
 
 我们可以这样写：
 
@@ -380,6 +427,20 @@ app:  $(OBJ)
     gcc -o $@ $<
 ```
 虽然按常规的理解，$< 代表的是第一个依赖的文件，而目标文件 app 后只接了一个变量 $(objects)，按照某些人的理解,$(objects) 需看作是一个整体，这个“依赖文件”理应是变量 $(objects)，遗憾的是，里面包含了：main.o addition.o subtraction.o division.o multiplication.o 几个文件。如果用符号 $< 指代的是第一个依赖文件 main.o 所以不能用 $< 
+
+## 清空编译文件
+
+我们发现每次编译的过程中都会产生一大堆中间文件，这令人感到杂乱，每个 Makefile 中都应该写一个清空目标文件（.o和执行文件）的规则，这不仅便于重编译，也很利于保持文件的清洁。
+
+```
+.PHONY : clean
+clean :
+	-rm $(OBJ) app
+```
+
+.PHONY 意思表示 clean 是一个“伪目标”，在rm命令前面加了一个小减号的意思就是，也许某些文件出现问题，但不要管，继续做后面的事。clean 的规则不要放在文件的开头，不然，这就会变成make 的默认目标，一般我们都会放在文件结尾处。
+
+输入命令行： make clean 就可以清除对应的文件了。
 
 到这里为止，单目录里的 Makefile 我们就已经基本学完了。那又有朋友问了，我的工程很大啊，不是一个文件夹能装得下的，多目录下又该怎么写呢？
 
