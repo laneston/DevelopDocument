@@ -16,6 +16,10 @@
 
 本篇文章是翻译ST手册 RM0090 以太网硬件部分，本着学习的目的，笔者会在翻译的过程添加自己的见解。由于篇幅较长，翻译需要分多次完成，主要会围绕当前开源项目的内容进行学习与翻译，其余非主要内容会在文章收尾之后补上。
 
-**5. <a href="https://github.com/laneston/Note/blob/master/Makefile_Note.md"> Makefile_Note </a>**
+**5. <a href="https://github.com/laneston/Note/blob/master/Hey_Makefile.md"> Hey Makefile! </a>**
 
-这篇文章是关于交叉编译链的学习笔记当中的核心篇目。文章围绕makefile文件的编写方式，向读者讲述如何在ubuntu平台上用GCC交叉编译链编译出STM32F4xx系列的执行文件（bin)。
+本篇文章将会用两个例子来说明 Makefile 是如何运行的，笔者用较小的篇幅来概括初学者在编写 Makefile 时会遇到的问题，这篇文章的目的就是用最直接简单有效的方式教会大家编写 Makefile。在看完这篇文章后，也能开始写自己的 Makefile 。
+
+**6. <a href="https://github.com/laneston/Note/blob/master/Makefile_Note.md"> Makefile_Note </a>**
+
+文章围绕makefile文件的编写方式，向读者讲述如何在ubuntu平台上用交叉编译链 arm-none-eabi- 编译出 STM32F4xx 系列 MCU 的执行文件。文章核心在于讲述 arm-none-eabi- 在 Makefile 中的应用方式，对比于嵌入式可视编译器 keil_v5 有什么共同点，编译思维是怎样产生的，由此来完成一个简单项目 <a href="https://github.com/laneston/STM32F4xx_LED-Makefile"> STM32F4xx_LED-Makefile </a> 的编译工作。
