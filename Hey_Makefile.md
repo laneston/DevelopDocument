@@ -444,5 +444,116 @@ clean :
 
 到这里为止，单目录里的 Makefile 我们就已经基本学完了。那又有朋友问了，我的工程很大啊，不是一个文件夹能装得下的，多目录下又该怎么写呢？
 
-不要急，我亲爱的朋友，晚些就告诉你。
+不要急，我亲爱的朋友。
 
+# 多目录下的Makefile
+
+如果有以下结构的工程，我们又该怎么写 Makefile 呢？
+
+```
+TEST_B
+	|__generalOperation
+	|	|__addition.h
+	|	|__addition.c
+	|	|__subtraction.h
+	|	|__subtraction.c
+	|
+	|__shiftOperation
+	|	|__division.h
+	|	|__division.c
+	|	|__multiplication.h
+	|	|__multiplication.c
+	|
+	|__User
+	|	|__main.c
+	|	|__main.h
+	|
+	|__Makefile
+```
+
+那简单，我们用变量把文件路径包括进来就行。
+
+```
+SRC += ./User/*.c
+SRC += ./User/*.c
+SRC += ./generalOperation/*.c
+```
+
+这部分是将3个文件夹中的 .c 文件追加到变量 SRC 中。但值得注意的是，这样子追加的变量是不能直接用的，因为 SRC 中保存的是原始字符串 \./User/*.c \./User/*.c \./generalOperation/*.c
+
+需要用 RAW_SRC := $(wildcard $(SRC)) 来转换一下。保存到 RAW_SRC 中的就是每个文件夹中的 .c 文件的路径啦。
+
+至于头文件呢，我们就需要用到 -I 这个符号了，后面可接头文件的保存路径。
+
+```
+DIR_INC += -I./User
+DIR_INC += -I./shiftOperation
+DIR_INC += -I./generalOperation
+```
+
+综上所述，我们可以得出 Makefile 文件为：
+
+```
+SRC += ./User/*.c
+SRC += ./shiftOperation/*.c
+SRC += ./generalOperation/*.c
+
+DIR_INC += -I./User
+DIR_INC += -I./shiftOperation
+DIR_INC += -I./generalOperation
+
+RAW_SRC := $(wildcard $(SRC))
+
+OBJ := $(RAW_SRC:%.c=%.o)
+
+app: $(OBJ)
+	@echo $(OBJ)
+	gcc -o $@ $(OBJ)
+
+%.o:%.c
+	gcc -c $(DIR_INC) $< -o $@
+
+.PHONY : clean
+clean :
+	-rm app
+	    ./User/*.o
+        ./shiftOperation/*.o
+        ./generalOperation/*.o
+```
+
+这时候，有朋友就不能满意了。因为发现 .o 文件跟 .c 混在一起了，目标文件也跟 Makefile 文件放在一起了。之所以用多个文件夹区分文件，是因为想把不同的文件归类啊。
+
+那我们就创建一个 output 文件夹吧。
+
+```
+SRC += ./User/*.c
+SRC += ./shiftOperation/*.c
+SRC += ./generalOperation/*.c
+
+DIR_INC += -I./User
+DIR_INC += -I./shiftOperation
+DIR_INC += -I./generalOperation
+
+RAW_SRC := $(wildcard $(SRC))
+
+OBJ := $(RAW_SRC:%.c=%.o)
+
+./output/app: $(OBJ)
+	@echo $(OBJ)
+	gcc -o $@ $(OBJ)
+	-mv ./User/*.o ./output
+	-mv ./shiftOperation/*.o ./output
+	-mv ./generalOperation/*.o ./output
+
+%.o:%.c
+	gcc -c $(DIR_INC) $< -o $@
+
+.PHONY : clean
+clean :
+	-rm ./output/*.o\
+	    ./output/app
+```
+
+有朋友看到这段 Makefile 可能就惊叹了，什么？竟然直接用 mv 命令来把 .o 文件剪切到 output 文件夹。没错，就是这么直接，因为 Makefile 其实就是 Shell 脚本啊。
+
+当然， Makefile 的运用还可以更巧妙。 也有 vpath 这种关键词来辅助文件路径的寻找。但这篇文章的目的就是用最直接简单有效的方式教会大家编写 Makefile ，而进阶的事情，还是留到之后的实践再慢慢学习吧。
