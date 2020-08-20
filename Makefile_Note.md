@@ -199,7 +199,7 @@ Makefile 文件的逻辑我就不作解释了，因为写得十分简单，只�
 
 到这里我们已经实现了交叉编译链下的STM32程序编译，但这时有朋友就不满意了，用 keil_v5 编译的执行文件只有 2KB ，而用 arm-none-eabi- 编译的居然有 15KB 那么大。别急，其实我们也能像编译器那样进行优化的。
 
-我们想一下，一个东西为什么那么大？因为里面的东西多咯。如果里面有些东西我们不需要的就可以扔掉了。代码中也不是所有函数都会用到，每个函数可以看作是一个section，GCC链接操作是以section作为最小的处理单元，只要一个section中的某个符号被引用，该section就会被加入到可执行程序中去。因此，GCC在编译时可以使用 -ffunction-sections和 -fdata-sections 将每个函数或符号创建为一个sections，其中每个sections名与function或data名保持一致。而在链接阶段， -Wl,–gc-sections 指示链接器去掉不用的section（其中-wl, 表示后面的参数 -gc-sections 传递给链接器），这样就能减少最终的可执行程序的大小了。所有最终 Makefile 就变成：
+一个东西为什么那么大？因为里面的东西多咯，如果里面有些东西我们不需要，那扔掉就可以减轻负担了。代码中也不是所有函数都会用到的，每个函数可以看作是一个section，GCC链接操作是以section作为最小的处理单元，只要一个section中的某个符号被引用，该section就会被加入到可执行程序中去。因此，GCC在编译时可以使用 -ffunction-sections和 -fdata-sections 将每个函数或符号创建为一个sections，其中每个sections名与function或data名保持一致。而在链接阶段， -Wl,–gc-sections 指示链接器去掉不用的section（其中-wl, 表示后面的参数 -gc-sections 传递给链接器），这样就能减少最终的可执行程序的大小了。所有最终 Makefile 就变成：
 
 ```
 BIN = ./output/STM32F4xx_LED.bin
