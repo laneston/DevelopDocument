@@ -554,6 +554,32 @@ clean :
 	    ./output/app
 ```
 
-有朋友看到这段 Makefile 可能就惊叹了，什么？竟然直接用 mv 命令来把 .o 文件剪切到 output 文件夹。没错，就是这么直接，因为 Makefile 其实就是 Shell 脚本啊。
+有朋友看到这段 Makefile 可能就惊叹了，什么？竟然直接用 mv 命令来把 .o 文件剪切到 output 文件夹。没错，就是这么直接，因为 Makefile 其实就是 Shell 脚本啊。其实这里还可以变得更巧妙些，在 .o 文件编译时就可以将文件移动到 output 文件夹中。
 
+```
+SRC += ./User/*.c
+SRC += ./shiftOperation/*.c
+SRC += ./generalOperation/*.c
+
+DIR_INC += -I./User
+DIR_INC += -I./shiftOperation
+DIR_INC += -I./generalOperation
+
+RAW_SRC := $(wildcard $(SRC))
+
+OBJ := $(RAW_SRC:%.c=%.o)
+
+./output/app: $(OBJ)
+	@echo $(OBJ)
+	gcc -o $@ $(OBJ)
+
+%.o:%.c
+	gcc -c $(DIR_INC) $< -o $@
+	-mv $@ ./output
+
+.PHONY : clean
+clean :
+	-rm ./output/*.o\
+	    ./output/app
+```
 当然， Makefile 的运用还可以更巧妙。 也有 vpath 这种关键词来辅助文件路径的寻找。但这篇文章的目的就是用最直接简单有效的方式教会大家编写 Makefile ，而进阶的事情，还是留到之后的实践再慢慢学习吧。
