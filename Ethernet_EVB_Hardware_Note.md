@@ -1,10 +1,10 @@
 **目录**
 
-<a href="#MII与RMII">MII与RMII</a><br>
+<a href="#MII and RMII">MII与RMII</a><br>
+<a href="#WIFI Standard">WIFI 标准</a><br>
 
 
-
-<h3 id="MII与RMII">MII与RMII</h3>
+<h3 id="MII and RMII">MII与RMII</h3>
 
 MII即“媒体独立接口”，也叫“独立于介质的接口”。它是IEEE-802.3定义的以太网行业标准。它包括一个数据接口，以及一个MAC和PHY之间的管理接口。
 
@@ -32,4 +32,22 @@ RMII全称为“简化的媒体独立接口”，是IEEE-802.3u标准中除MII�
 <img src="https://github.com/laneston/Pictures/blob/master/Ethernet_EVB_Hardware_Note/RMII.jpg" width="50%" height="50%">
 
 通过将相同的时钟源接到MAC和以太网PHY的REF_CLK引脚保证两者时钟源的同步。可以通过外部的50MHZ信号或者GD32F107xx微控制器的MCO引脚提供这一时钟。当时钟来源MCO引脚时需配置合适的PLL，保证MCO引脚输出的时钟为50MHZ。
+
+<h3 id="WIFI Standard"> WIFI 标准 </h3>
+
+|标准|发布时间|工作频段|传输最高速率|
+|:--:|:-----:|:-----:|:---------:|
+|802.11a|1999|5GHz|54Mbps|
+|802.11b|1999|2.4GHz|11mbps|
+|802.11g|2003|2.4GHZ|54mbps|
+|802.11n|2009|2.4G5GHz|300mbps|
+|802.11ac|2012|5GHz|1Gbps|
+
+以上各种标准的区别在于使用了不同的扩频方式、复用方式和调制方式。
+
+- 扩频方式主要有DSSS，FHSS，THSS等。
+- 复用和多址主要有TDMA，FDMA，CDMA，SDMA，OFDM等。
+- 调制方式主要有BPSK，QPSK，QAM等。
+- 每个子载波又采用BPSK，QAM，16QAM，64QAM的调制方式，每种调制方式都对应不同的数据速率。
+
 
