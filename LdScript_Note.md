@@ -1,4 +1,4 @@
-本篇文章主要围绕项目<a href = "https://github.com/laneston/STM32_RTOS_GUN">STM32_RTOS_GUN</a>的链接脚本 STM32F417IG_FLASH.ld 进行分析，同时对编写链接脚本的方法进行相应的讲解，尽可能地做到通过阅读这篇文章后能够学会编写简单的链接脚本。
+本篇文章主要围绕项目 <a href = "https://github.com/laneston/STM32_RTOS_GUN">STM32_RTOS_GUN</a> 的链接脚本 STM32F417IG_FLASH.ld 进行分析，同时对编写链接脚本的方法进行相应的讲解，尽可能地做到通过阅读这篇文章后能够学会编写简单的链接脚本。
 
 # 什么是链接脚本
 
@@ -12,7 +12,7 @@
 
 ## 基本概念
 
-总所周知，连接器把多个输入文件合并成单个输出文件。当中输出文件和输入文件都以一种叫做 “目标文件格式” 的可执行文件存在，譬如 .o 和 .elf 文件。每一个目标文件中都有一个节列表。我们把输入文件的节叫做输入节(input section)，相似的，输出文件中的一个节叫做输出节(output section)。目标文件的每个 section 至少包含两个信息: 名字和大小. 大部分 section 还包含与它相关联的一块数据, 称为 section contents(section内容)。 一个 section 可被标记为 “loadable(可加载的)” 或 “allocatable(可分配的)” 。这个概念笔者曾在编程笔记： <a href = "https://github.com/laneston/Note/blob/master/Makefile_Note.md">Makefile_Note</a> **编译优化** 一节中有提到过。
+总所周知，连接器把多个输入文件合并成单个输出文件。当中输出文件和输入文件都以一种叫做 “目标文件格式” 的可执行文件存在，譬如 .o 和 .elf 文件。每一个目标文件中都有一个节列表。我们把输入文件的节叫做输入节(input section)，相似的，输出文件中的一个节叫做输出节(output section)。目标文件的每个 section 至少包含两个信息: 名字和大小. 大部分 section 还包含与它相关联的一块数据, 称为 section contents(section内容)。 一个 section 可被标记为 “loadable(可加载的)” 或 “allocatable(可分配的)” 。这个概念笔者曾在编程笔记： <a href = "https://github.com/laneston/Note/blob/master/Makefile_Note.md">Makefile_Note</a>里 **编译优化** 一节中有提到过。
 
 ## VMA和LMA
 
@@ -165,7 +165,7 @@ SECTIONS
 
 ```
 
-这是<a href = "https://github.com/laneston/STM32_RTOS_GUN">STM32_RTOS_GUN</a>的链接脚本，项目基于 STM32F407 硬件平台进行开发，笔者把脚本中的注释去除掉了，让它看起来尽可能地简短，但我们看起来仍旧觉得凌乱不堪。其实链接脚本可以做到很简单，之所以举这个例子，是因为笔者经历过后思维比较清晰，而其中涉及的内容也较为普遍常用，没什么花里胡哨的技巧。
+这是 <a href = "https://github.com/laneston/STM32_RTOS_GUN">STM32_RTOS_GUN</a> 的链接脚本，项目基于 STM32F407 硬件平台进行开发，笔者把脚本中的注释去除掉了，让它看起来尽可能地简短，但我们看起来仍旧觉得凌乱不堪。其实链接脚本可以做到很简单，之所以举这个例子，是因为笔者经历过后思维比较清晰，而其中涉及的内容也较为普遍常用，没什么花里胡哨的技巧。
 
 # 脚本分析与学习
 
