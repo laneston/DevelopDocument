@@ -169,11 +169,11 @@ SECTIONS
 
 # 脚本分析与学习
 
-笔者想先在这里说明一下，以便减轻一些初接触链接文件的朋友的疑惑。在链接文件中定义的变量是会其他文件(譬如 startup.s)中声明的，而这里只是做一个引用操作，所以在这里所用的变量需要与其他文件进行一个联系。举个例子：在脚本第一行中的 Reset_Handler 的本体要追溯到文件：STM32F4xx_DSP_StdPeriph_Lib_V1.8.0\CMSIS\Device\ST\STM32F4xx\Source\Templates\TrueSTUDIO\startup_stm32f40_41xxx.s 中的 69 行，在那里定义了 Reset_Handler 是一个 .text section。
+在编译的过程中 .c 文件被编译为二进制执行文件 .o 文件，此时 .o 文件是未带有解析地址的，简而言之就是这个文件放在那个位置并未明确。而后工具链的链接器将所有C文件的 .o 文件链接将他们有序的排列到储存中，并将它们各个函数处的地址进行解析，使得其他不同地方的函数能够跳转到该函数的入口地址。由此一个有序排列的可被单片机执行的文件便生成了。至于其中各个.c 文件产生的功能在单片机储存中的排列顺序和地址位置，在最后我们链接器工作产生的.map文件中是有显示的，如下面从样例工程中.map文件中复制的片段：
 
 ## 简单脚本命令
 
-好了，话不多说我们就看脚本的第一行：
+我们就看脚本的第一行：
 
 ```
 ENTRY(Reset_Handler)
@@ -262,25 +262,25 @@ SECTION-NAME [ADDRESS] [(TYPE)] : [AT(LMA)]
 } [>REGION] [AT>LMA_REGION] [:PHDR HDR ...] [=FILLEXP]
 ```
 
-我们看到上面的输出 section 命令与讲述的格式不太一样，少了许多东西。是的，中括号[]里的东西是可以省略的。
+我们看到上面的输出 section 命令与讲述的格式不太一样，少了许多东西，没错，中括号[]里的东西是可以省略的。但 .SECTION-NAME 左右的空白与冒号是必须的，所以上面的一段命令中 .SECTION-NAME 是 .isr_vector 。作为启动代码在 startup_stm32f40_41xxx.s 中定义： .section  .isr_vector,"a",%progbits
 
-.SECTION-NAME 左右的空白与冒号是必须的。所以上面的一段命令中 .SECTION-NAME 是 .isr_vector 。作为启动代码在 startup_stm32f40_41xxx.s 中定义： .section  .isr_vector,"a",%progbits
-
-输出 section 名字 SECTION-NAME 必须符合输出文件格式要求，比如：.o 格式的文件只允许存在.text .data 和.bss 的section 名。而有的格式只允许存在数字名字，那么此时应该用引号将所有名字内的数字组合在一起；另外，还有一些格式允许任何序列的字符存在于 section 名字内，此时如果名字内包含特殊字符(比如空格、逗号等)，那么需要用引号将其组合在一起。
+输出 section 名字 SECTION-NAME 必须符合输出文件格式要求，比如：.o 格式的文件只允许存在.text .data 和.bss 的 section 名。而有的格式只允许存在数字名字，那么此时应该用引号将所有名字内的数字组合在一起；另外，还有一些格式允许任何序列的字符存在于 section 名字内，此时如果名字内包含特殊字符(比如空格、逗号等)，那么需要用引号将其组合在一起。
 
 输出 section 地址[ADDRESS]是一个表达式，它的值用于设置VMA。如果没有该选项且有 REGION 选项，那么连接器将根据 REGION 设置 VMA；如果也没有 REGION 选项，那么连接器将根据定位符号 ‘.’ 的值设置该 section 的 VMA，将定位符号的值调整到满足输出section 对齐要求后的值，这时输出 section 的对齐要求为：该输出 section 描述内用到的所有输入 section 的对齐要求中最严格的对齐要求。
 
-. = ALIGN(4); 是对齐格式。
+. 小数点表示当前的地址位置。
 
->FLASH 意思是该 section 加载在 Flash 当中。
+. = ALIGN(4); 是对齐格式，此处按4字节长度对齐。
 
-至于 KEEP(*(.isr_vector)) 这一句命令，我们需要分两部分来看。
+>FLASH 意思是该 section 链接到 Flash 当中。
+
+至于 KEEP(*(.isr_vector)) 这一句命令，我们需要分两部分来看：
 
 *(.isr_vector) 是通配符格式，表明的是所有输入文件的 .isr_vector section
 
-在连接命令行内使用了选项 –gc-sections 后，连接器可能将某些它认为没用的 section 过滤掉，此时就有必要强制连接器保留一些特定的 section，可用 KEEP() 关键字达此目的。
+其次，在连接命令行内使用了选项 –gc-sections 后，连接器可能将某些它认为没用的 section 过滤掉，此时就有必要强制连接器保留一些特定的 section，可用 KEEP() 关键字达此目的。
 
-整段的意思是：把所有文件 .isr_vector section 段命名为 .isr_vector section，并链接到 MEMORY 定义的 FLASH 中。
+整段的意思是：把所有输入文件(.o文件)的 .isr_vector 段命名为 .isr_vector section，并链接到 MEMORY 定义的 FLASH 中。
 
 ## 输出 section 的进阶描述
 
@@ -315,9 +315,25 @@ SECTION-NAME [ADDRESS] [(TYPE)] : [AT(LMA)]
 
 \*(.text*) 指示将工程中所有目标文件的 .text 段链接到 FLASH 中。
 
-链接过程是按顺序执行的，即先链接 .o 文件，再链接其他目标文件。
+链接过程是按顺序执行的，先链接 .o 文件，再链接其他目标文件。
 
+我们接着往下看：
 
+```
+  .rodata :
+  {
+    . = ALIGN(4);
+    *(.rodata)
+    *(.rodata*)
+    . = ALIGN(4);
+  } >FLASH
+```
+
+这段脚本的意思是：把输入文件(.o)和目标文件的常量区块(.rodata)链接到 Flash 中。
+
+```
+  .ARM.extab   : { *(.ARM.extab* .gnu.linkonce.armextab.*) } >FLASH
+```
 
 
 
