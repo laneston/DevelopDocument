@@ -86,6 +86,7 @@ SECTIONS
     KEEP (*(.preinit_array*))
     PROVIDE_HIDDEN (__preinit_array_end = .);
   } >FLASH
+
   .init_array :
   {
     PROVIDE_HIDDEN (__init_array_start = .);
@@ -93,6 +94,7 @@ SECTIONS
     KEEP (*(.init_array*))
     PROVIDE_HIDDEN (__init_array_end = .);
   } >FLASH
+
   .fini_array :
   {
     PROVIDE_HIDDEN (__fini_array_start = .);
@@ -100,7 +102,6 @@ SECTIONS
     KEEP (*(.fini_array*))
     PROVIDE_HIDDEN (__fini_array_end = .);
   } >FLASH
-
 
   _sidata = LOADADDR(.data);
 
@@ -172,9 +173,13 @@ SECTIONS
 
 ## 简单脚本命令
 
-好了，话不多说我们就看脚本的第一行：ENTRY(Reset_Handler)
+好了，话不多说我们就看脚本的第一行：
 
-光看字面，我们凭借直觉可以猜出，这是一个 Reset 的中断句柄。指令被称为入口点entry point,可以使用 ENTRY 链接脚本命令设置 entry point，参数是一个符号名。有几种方法可以设置 entry point,链接器会按照如下的顺序来尝试各种方法，只要任何一种方法成功则会停止：
+```
+ENTRY(Reset_Handler)
+```
+
+从字面看，我们可以猜出这是一个 Reset 的中断句柄。指令被称为入口点 entry point，可以使用 ENTRY 链接脚本命令设置 entry point，参数是一个符号名。有几种方法可以设置 entry point,链接器会按照如下的顺序来尝试各种方法，只要任何一种方法成功就会停止：
 
 1. ld命令行的-e选项
 2. 连接脚本的ENTRY(SYMBOL)命令
@@ -182,12 +187,16 @@ SECTIONS
 4. 如果存在.text section, 使用.text section的第一字节的位置值
 5. 使用值0
 
+```
 _estack = 0x2001FFFF;
+```
 
 这段声明内存末尾地址。
 
+```
 _Min_Heap_Size = 0x200;
 _Min_Stack_Size = 0x400;
+```
 
 这段定义了堆和栈的最小空间大小。如果定义的数值不符合内存的规格，在编译时会产生链接错误。
 
@@ -206,13 +215,16 @@ CCMRAM (rw)      : ORIGIN = 0x10000000, LENGTH = 64K
 
 连接器在缺省状态下被配置为允许分配所有可用的内存块，所以我们可以使用 ‘MEMORY’ 命令重新配置这个设置。‘MEMORY’ 命令描述目标平台上内存块的位置与长度。我们可以用它来描述哪些内存区域可以被连接器使用，哪些内存区域是要避免使用的，然后我们就可以把节(section)分配到特定的内存区域中。连接器会基于内存区域设置节的地址，对于太满的区域，会提示警告信息。连接器不会为了适应可用的区域而搅乱节。一个连接脚本最多可以包含一次MEMORY命令。但可以在命令中定义任意的内存块。
 
-一旦你定义了一个内存区域，可以指示连接器把指定的输出段放入到这个内存区域中，这可以通过使用 ‘>REGION’ 输出段属性，这操作可以在之后的内容中看到。
+一旦你定义了一个内存区域，可以指示连接器把指定的输出段放入到这个内存区域中，这可以通过使用 ‘>REGION’ 输出段属性，这种操作可以在之后的内容中看到。
 
 ## SECTIONS
 
-这个部分是 .ld 文件的核心部分，笔者将会用较大篇幅去讲述，请各位看官耐心观看，我们开始吧。
+这个部分是 .ld 文件的核心部分，将会用较大篇幅去讲述，请各位看官耐心。
 
-### SECTIONS 命令的格式
+### SECTIONS 命令
+
+**SECTIONS 命令** 是脚本文件中最重要的元素，不可缺省。它的作用就是用来描述输出文件的布局。
+
 ```
 SECTIONS
 {
@@ -224,9 +236,9 @@ SECTIONS
 }
 ```
 
-这个 **SECTIONS 命令** 是脚本文件中最重要的元素，不可缺省。它的作用就是用来描述输出文件的布局。secname 和 contents 是必须的，其他都是可选的参数。SECTIONS 命令告诉 .ld 文件如何把输入文件的 sections 映射到输出文件的各个 section；如何将输入 section 合为输出 section；如何把输出 section 放入程序地址空间 (VMA) 和进程地址空间 (LMA) 。如果整个连接脚本内没有 SECTIONS 命令, 那么 .ld 将所有同名输入 section 合成为一个输出 section 内, 各输入 section 的顺序为它们被连接器发现的顺序。如果某输入 section 没有在 SECTIONS 命令中提到，那么该 section 将被直接拷贝成输出 section。
+secname 和 contents 是必须的，其他都是可选的参数。SECTIONS 命令告诉 .ld 文件如何把输入文件的 sections 映射到输出文件的各个 section；如何将输入 section 合为输出 section；如何把输出 section 放入程序地址空间 (VMA) 和进程地址空间 (LMA) 。如果整个连接脚本内没有 SECTIONS 命令, 那么 .ld 将所有同名输入 section 合成为一个输出 section 内, 各输入 section 的顺序为它们被连接器发现的顺序。如果某输入 section 没有在 SECTIONS 命令中提到，那么该 section 将被直接拷贝成输出 section。
 
-说到这里，可能有很多朋友就懵了。不过不要紧，毕竟掌握的信息还很少，尚不足以产生理解的质变。我们接着分析 SECTIONS 命令里面的内容。
+说到这里，很多朋友可能有点懵了，不过不要紧，毕竟掌握的信息还很少，尚不足以产生理解的质变，我们接着分析 SECTIONS 命令里面的内容。
 
 ### 输出 section 的描述
 
