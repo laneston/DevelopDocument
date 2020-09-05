@@ -311,9 +311,11 @@ SECTION-NAME [ADDRESS] [(TYPE)] : [AT(LMA)]
 3. .bss    段通常是指用来存放程序中未初始化的全局变量的一块内存区域。属于静态内存分配。
 4. .rodata 段通常是指用来存放程序中常量的一块内存区域。属于静态内存分配。
 
-*(.text) 指示将工程中所有输入文件 .o 的 代码段(.text) 链接到 MEMORY 定义的 FLASH 中。
+*(.text) 指示将工程中所有**输入文件** .o 的 代码段(.text) 链接到 MEMORY 定义的 FLASH 中。
 
-\*(.text*) 指示将工程中所有目标文件的 .text 段链接到 FLASH 中。
+\*(.text*) 指示将工程中所有**目标文件**的 .text 段链接到 FLASH 中。
+
+剩下的 glue_7 glue_7t 和 eh_frame 也如此类推。
 
 链接过程是按顺序执行的，先链接 .o 文件，再链接其他目标文件。
 
@@ -335,5 +337,26 @@ SECTION-NAME [ADDRESS] [(TYPE)] : [AT(LMA)]
   .ARM.extab   : { *(.ARM.extab* .gnu.linkonce.armextab.*) } >FLASH
 ```
 
+```
+  .ARM : {
+    __exidx_start = .;
+    *(.ARM.exidx*)
+    __exidx_end = .;
+  } >FLASH
+```
 
 
+
+```
+  ._user_heap_stack :
+  {
+    . = ALIGN(4);
+    PROVIDE ( end = . );
+    PROVIDE ( _end = . );
+    . = . + _Min_Heap_Size;
+    . = . + _Min_Stack_Size;
+    . = ALIGN(4);
+  } >RAM
+```
+
+PROVIDE 关键字定义一个（目标文件内被引用但没定义）符号。相当于定义一个全局变量的符号表，其他C文件可以通过该符号来操作对应的存储内存。
