@@ -311,13 +311,7 @@ SECTION-NAME [ADDRESS] [(TYPE)] : [AT(LMA)]
 3. .bss    段通常是指用来存放程序中未初始化的全局变量的一块内存区域。属于静态内存分配。
 4. .rodata 段通常是指用来存放程序中常量的一块内存区域。属于静态内存分配。
 
-*(.text) 指示将工程中所有**输入文件** .o 的 代码段(.text) 链接到 MEMORY 定义的 FLASH 中。
-
-\*(.text*) 指示将工程中所有**目标文件**的 .text 段链接到 FLASH 中。
-
-剩下的 glue_7 glue_7t 和 eh_frame 也如此类推。
-
-链接过程是按顺序执行的，先链接 .o 文件，再链接其他目标文件。
+\*(.text) 指示将工程中所有**输入文件** .o 的 代码段(.text) 链接到 MEMORY 定义的 FLASH 中； \*(.text*) 指示将工程中所有**目标文件**的 .text 段链接到 FLASH 中； *(.eh_frame) 指示输入文件所有的 .eh_frame 段链接到 FLASH 中。在为AArch64状态编译时，展开信息将放在 .eh_frame section 中，本 section 包含了在抛出 C++ 异常时堆栈展开的信息，类似于之后输出 section 中 .ARM.exidx 和 .ARM.extab。链接过程是按顺序执行的，先链接 .o 文件，再链接其他目标文件。
 
 我们接着往下看：
 
@@ -335,9 +329,6 @@ SECTION-NAME [ADDRESS] [(TYPE)] : [AT(LMA)]
 
 ```
   .ARM.extab   : { *(.ARM.extab* .gnu.linkonce.armextab.*) } >FLASH
-```
-
-```
   .ARM : {
     __exidx_start = .;
     *(.ARM.exidx*)
@@ -345,18 +336,26 @@ SECTION-NAME [ADDRESS] [(TYPE)] : [AT(LMA)]
   } >FLASH
 ```
 
+.ARM.exidx 和 .ARM.extab 这两个段是在编译 c++ 时出现的，而且看起来只有 4.1 以上版本的 arm-linux-gcc 编译器才会生成。
 
+.ARM.extab 包含异常展开信息。
+
+.ARM.exidx 包含用于 section 展开的索引条目。
 
 ```
-  ._user_heap_stack :
+  .preinit_array  :
   {
-    . = ALIGN(4);
-    PROVIDE ( end = . );
-    PROVIDE ( _end = . );
-    . = . + _Min_Heap_Size;
-    . = . + _Min_Stack_Size;
-    . = ALIGN(4);
-  } >RAM
+    PROVIDE_HIDDEN (__preinit_array_start = .);
+    KEEP (*(.preinit_array*))
+    PROVIDE_HIDDEN (__preinit_array_end = .);
+  } >FLASH
 ```
 
-PROVIDE 关键字定义一个（目标文件内被引用但没定义）符号。相当于定义一个全局变量的符号表，其他C文件可以通过该符号来操作对应的存储内存。
+
+
+
+
+
+
+
+
