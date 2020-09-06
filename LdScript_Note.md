@@ -181,11 +181,11 @@ ENTRY(Reset_Handler)
 
 从字面看，我们可以猜出这是一个 Reset 的中断句柄。指令被称为入口点 entry point，可以使用 ENTRY 链接脚本命令设置 entry point，参数是一个符号名。有几种方法可以设置 entry point,链接器会按照如下的顺序来尝试各种方法，只要任何一种方法成功就会停止：
 
-1. ld命令行的-e选项
-2. 连接脚本的ENTRY(SYMBOL)命令
-3. 如果定义了start符号, 使用start符号值
-4. 如果存在.text section, 使用.text section的第一字节的位置值
-5. 使用值0
+1. ld 命令行的 -e 选项；
+2. 连接脚本的ENTRY(SYMBOL)命令；
+3. 如果定义了 start 符号，使用 start 符号值；
+4. 如果存在 .text section，使用 .text section 的第一字节的位置值；
+5. 使用值0。
 
 ```
 _estack = 0x2001FFFF;
@@ -200,7 +200,7 @@ _Min_Stack_Size = 0x400;
 
 这段定义了堆和栈的最小空间大小。如果定义的数值不符合内存的规格，在编译时会产生链接错误。
 
-## MEMORY命令
+## MEMORY关键字
 
 ```
 MEMORY
@@ -213,7 +213,7 @@ CCMRAM (rw)      : ORIGIN = 0x10000000, LENGTH = 64K
 
 这段定义了 FLASH RAM 和 CCMRAM 的起始地址和长度，(xrw)表明了权限，r是读、w是写、x是执行，这个和 Linux 中的 shell 命令一样。
 
-连接器在缺省状态下被配置为允许分配所有可用的内存块，所以我们可以使用 ‘MEMORY’ 命令重新配置这个设置。‘MEMORY’ 命令描述目标平台上内存块的位置与长度。我们可以用它来描述哪些内存区域可以被连接器使用，哪些内存区域是要避免使用的，然后我们就可以把节(section)分配到特定的内存区域中。连接器会基于内存区域设置节的地址，对于太满的区域，会提示警告信息。连接器不会为了适应可用的区域而搅乱节。一个连接脚本最多可以包含一次MEMORY命令。但可以在命令中定义任意的内存块。
+连接器在缺省状态下被配置为允许分配所有可用的内存块，所以我们可以使用 ‘MEMORY’ 命令重新配置这个设置。‘MEMORY’ 命令描述目标平台上内存块的位置与长度。我们可以用它来描述哪些内存区域可以被连接器使用，哪些内存区域是要避免使用的，然后我们就可以把节(section)分配到特定的内存区域中。连接器会基于内存区域设置节的地址，对于太满的区域，会提示警告信息。连接器不会为了适应可用的区域而搅乱节。一个连接脚本最多可以包含一次 MEMORY 命令。但可以在命令中定义任意的内存块。
 
 一旦你定义了一个内存区域，可以指示连接器把指定的输出段放入到这个内存区域中，这可以通过使用 ‘>REGION’ 输出段属性，这种操作可以在之后的内容中看到。
 
@@ -221,9 +221,9 @@ CCMRAM (rw)      : ORIGIN = 0x10000000, LENGTH = 64K
 
 这个部分是 .ld 文件的核心部分，将会用较大篇幅去讲述，请各位看官耐心。
 
-### SECTIONS 命令
+### SECTIONS 关键字
 
-**SECTIONS 命令** 是脚本文件中最重要的元素，不可缺省。它的作用就是用来描述输出文件的布局。
+**SECTIONS 关键字** 是脚本文件中最重要的元素，不可缺省。它的作用就是用来描述输出文件的布局。
 
 ```
 SECTIONS
@@ -311,7 +311,7 @@ SECTION-NAME [ADDRESS] [(TYPE)] : [AT(LMA)]
 3. .bss    段通常是指用来存放程序中未初始化的全局变量的一块内存区域。属于静态内存分配。
 4. .rodata 段通常是指用来存放程序中常量的一块内存区域。属于静态内存分配。
 
-\*(.text) 指示将工程中所有**输入文件** .o 的 代码段(.text) 链接到 MEMORY 定义的 FLASH 中； \*(.text*) 指示将工程中所有**目标文件**的 .text 段链接到 FLASH 中； *(.eh_frame) 指示输入文件所有的 .eh_frame 段链接到 FLASH 中。在为AArch64状态编译时，展开信息将放在 .eh_frame section 中，本 section 包含了在抛出 C++ 异常时堆栈展开的信息，类似于之后输出 section 中 .ARM.exidx 和 .ARM.extab。链接过程是按顺序执行的，先链接 .o 文件，再链接其他目标文件。
+\*(.text) 指示将工程中所有**输入文件** .o 的 代码段(.text) 链接到 MEMORY 定义的 FLASH 中； \*(.text*) 指示将工程中所有**目标文件**的 .text 段链接到 FLASH 中； *(.eh_frame) 指示输入文件所有的 .eh_frame 段链接到 FLASH 中。在为 AArch64 状态编译时，展开信息将放在 .eh_frame section 中，本 section 包含了 C++ 异常堆栈信息的展开，类似于之后输出 section 中的 .ARM.exidx 和 .ARM.extab。链接过程是按顺序执行的，先链接 .o 文件，再链接其他目标文件。
 
 我们接着往下看：
 
@@ -336,11 +336,11 @@ SECTION-NAME [ADDRESS] [(TYPE)] : [AT(LMA)]
   } >FLASH
 ```
 
-.ARM.exidx 和 .ARM.extab 这两个段是在编译 c++ 时出现的，而且看起来只有 4.1 以上版本的 arm-linux-gcc 编译器才会生成。
+.ARM.exidx 和 .ARM.extab 这两个段是在编译 c++ 时出现的，而且只有 4.1 以上版本的 arm-linux-gcc 编译器才会生成。
 
-.ARM.extab 包含异常展开信息。
+.ARM.extab 包含异常信息的展开。
 
-.ARM.exidx 包含用于 section 展开的索引条目。
+.ARM.exidx 包含用于 section 索引条目的展开。
 
 ```
   .preinit_array  :
@@ -351,10 +351,33 @@ SECTION-NAME [ADDRESS] [(TYPE)] : [AT(LMA)]
   } >FLASH
 ```
 
+这段脚本所描述的内容是预初始化数组的定义。
+
+要解析关键字 PROVIDE_HIDDEN 前，需要先解释关键字 PROVIDE。在某些情况下，在符号(变量)被引用，并且未被链接中包含的任何对象定义时，用链接描述脚本定义一个符号(变量)。例如，传统的链接器定义了符号 “etext”。 但是，ANSI C 要求用户能够使用 “etext” 作为函数名称，而不会遇到错误。 仅当引用但未定义 PROVIDE 关键字时，才可以使用它来定义符号，就像 “etext”。 语法为 PROVIDE（symbol（symbol = expression）。而 PROVIDE_HIDDEN 与 PROVIDE 类似，作用相同。
+
+```
+  .init_array :
+  {
+    PROVIDE_HIDDEN (__init_array_start = .);
+    KEEP (*(SORT(.init_array.*)))
+    KEEP (*(.init_array*))
+    PROVIDE_HIDDEN (__init_array_end = .);
+  } >FLASH
+  ```
+
+这段脚本所描述的内容是初始化数组的定义。
 
 
 
-
+```
+  .fini_array :
+  {
+    PROVIDE_HIDDEN (__fini_array_start = .);
+    KEEP (*(SORT(.fini_array.*)))
+    KEEP (*(.fini_array*))
+    PROVIDE_HIDDEN (__fini_array_end = .);
+  } >FLASH
+```
 
 
 
