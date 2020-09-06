@@ -268,7 +268,7 @@ SECTION-NAME [ADDRESS] [(TYPE)] : [AT(LMA)]
 
 输出 section 地址[ADDRESS]是一个表达式，它的值用于设置VMA。如果没有该选项且有 REGION 选项，那么连接器将根据 REGION 设置 VMA；如果也没有 REGION 选项，那么连接器将根据定位符号 ‘.’ 的值设置该 section 的 VMA，将定位符号的值调整到满足输出section 对齐要求后的值，这时输出 section 的对齐要求为：该输出 section 描述内用到的所有输入 section 的对齐要求中最严格的对齐要求。
 
-. 小数点表示当前的地址位置。
+. 小数点为地址定位器(counter)，表示当前的地址位置，并且可以赋值。
 
 . = ALIGN(4); 是对齐格式，此处按4字节长度对齐。
 
@@ -276,9 +276,9 @@ SECTION-NAME [ADDRESS] [(TYPE)] : [AT(LMA)]
 
 至于 KEEP(*(.isr_vector)) 这一句命令，我们需要分两部分来看：
 
-*(.isr_vector) 是通配符格式，表明的是所有输入文件的 .isr_vector section
+- *(.isr_vector) 是通配符格式，表明的是所有输入文件的 .isr_vector section
 
-其次，在连接命令行内使用了选项 –gc-sections 后，连接器可能将某些它认为没用的 section 过滤掉，此时就有必要强制连接器保留一些特定的 section，可用 KEEP() 关键字达此目的。
+- 在连接命令行内使用了选项 –gc-sections 后，连接器可能将某些它认为没用的 section 过滤掉，此时就有必要强制连接器保留一些特定的 section，可用 KEEP() 关键字达此目的。
 
 整段的意思是：把所有输入文件(.o文件)的 .isr_vector 段命名为 .isr_vector section，并链接到 MEMORY 定义的 FLASH 中。
 
@@ -308,10 +308,14 @@ SECTION-NAME [ADDRESS] [(TYPE)] : [AT(LMA)]
 
 1. .text   段是用来存放程序执行代码的区；
 2. .data   段通常是用来存放程序中已初始化的全局变量的一块内存区域，属于静态内存分配。
-3. .bss    段通常是指用来存放程序中未初始化的全局变量的一块内存区域。属于静态内存分配。
-4. .rodata 段通常是指用来存放程序中常量的一块内存区域。属于静态内存分配。
+3. .bss    段通常是指用来存放程序中未初始化的全局变量的一块内存区域，属于静态内存分配。
+4. .rodata 段通常是指用来存放程序中常量的一块内存区域，属于静态内存分配。
 
-\*(.text) 指示将工程中所有**输入文件** .o 的 代码段(.text) 链接到 MEMORY 定义的 FLASH 中； \*(.text*) 指示将工程中所有**目标文件**的 .text 段链接到 FLASH 中； *(.eh_frame) 指示输入文件所有的 .eh_frame 段链接到 FLASH 中。在为 AArch64 状态编译时，展开信息将放在 .eh_frame section 中，本 section 包含了 C++ 异常堆栈信息的展开，类似于之后输出 section 中的 .ARM.exidx 和 .ARM.extab。链接过程是按顺序执行的，先链接 .o 文件，再链接其他目标文件。
+\*(.text) 指示将工程中所有**输入文件** .o 的 代码段(.text) 链接到 MEMORY 定义的 FLASH 中； \*(.text*) 指示将工程中所有**目标文件**的 .text 段链接到 FLASH 中； *(.eh_frame) 指示输入文件所有的 .eh_frame 段链接到 FLASH 中。
+
+通常编译器生成的代码会使用小的辅助函数来处理太大而无法内联的代码结构。例如处理器可能具有用于整数乘法的本机指令，但需要用于整数除法的辅助函数。gum_7t 段最适合用于 Thumb 模式的 ARMv7 核心粘合功能，而 gum_7 段则适用于 32 位 ARM 模式。
+
+.eh_frame 用于处理异常，它产生描述如何展开堆栈的表。当使用 gcc 编译 C 程序并使用 readelf 检查 sections 信息时，可以看到其中的 .eh_frame sections 和 .eh_frame_hdr sections。
 
 我们接着往下看：
 
@@ -336,11 +340,9 @@ SECTION-NAME [ADDRESS] [(TYPE)] : [AT(LMA)]
   } >FLASH
 ```
 
-.ARM.exidx 和 .ARM.extab 这两个段是在编译 c++ 时出现的，而且只有 4.1 以上版本的 arm-linux-gcc 编译器才会生成。
-
 .ARM.extab 包含异常信息的展开。
 
-.ARM.exidx 包含用于 section 索引条目的展开。
+.ARM.exidx 是包含用于展开堆栈的信息的部分。如果你的 C 程序具有可打印出堆栈回溯的函数，则这些函数可能取决于存在的本节。exidx 是常规起始地址和 extab 索引的有序表。可以查验PC（程序计数器）并通过表格进行搜索以找到相应的extab条目。可以在编译器选项中用 -funwind-tables 或 -fexceptions 标志寻找。
 
 ```
   .preinit_array  :
@@ -353,7 +355,7 @@ SECTION-NAME [ADDRESS] [(TYPE)] : [AT(LMA)]
 
 这段脚本所描述的内容是预初始化数组的定义。
 
-要解析关键字 PROVIDE_HIDDEN 前，需要先解释关键字 PROVIDE。在某些情况下，在符号(变量)被引用，并且未被链接中包含的任何对象定义时，用链接描述脚本定义一个符号(变量)。例如，传统的链接器定义了符号 “etext”。 但是，ANSI C 要求用户能够使用 “etext” 作为函数名称，而不会遇到错误。 仅当引用但未定义 PROVIDE 关键字时，才可以使用它来定义符号，就像 “etext”。 语法为 PROVIDE（symbol（symbol = expression）。而 PROVIDE_HIDDEN 与 PROVIDE 类似，作用相同。
+该关键字定义一个（目标文件内被引用但没定义）符号。相当于定义一个全局变量，其他C文件可以引用它。例如，传统的链接器定义了符号 “etext”。 但是，ANSI C 要求用户能够使用 “etext” 作为函数名称，而不会遇到错误。 仅当引用但未定义 PROVIDE 关键字时，才可以使用它来定义符号，就像 “etext”。 语法为 PROVIDE（symbol（symbol = expression）。而 PROVIDE_HIDDEN 与 PROVIDE 类似，作用相同。
 
 ```
   .init_array :
@@ -367,8 +369,6 @@ SECTION-NAME [ADDRESS] [(TYPE)] : [AT(LMA)]
 
 这段脚本所描述的内容是初始化数组的定义。
 
-
-
 ```
   .fini_array :
   {
@@ -378,6 +378,43 @@ SECTION-NAME [ADDRESS] [(TYPE)] : [AT(LMA)]
     PROVIDE_HIDDEN (__fini_array_end = .);
   } >FLASH
 ```
+
+这段脚本所描述的是用于析构或者说是删除的数组的定义。
+
+看到这里，可能大家都还在云里雾里，不明白以上的脚本究竟有什么用，别急，下面我会继续给大家解析，但在解释以上脚本时我们先看看下面的符号：
+
+```
+/* These magic symbols are provided by the linker.  */
+extern void (*__preinit_array_start []) (void) __attribute__((weak));
+extern void (*__preinit_array_end []) (void) __attribute__((weak));
+extern void (*__init_array_start []) (void) __attribute__((weak));
+extern void (*__init_array_end []) (void) __attribute__((weak));
+extern void (*__fini_array_start []) (void) __attribute__((weak));
+extern void (*__fini_array_end []) (void) __attribute__((weak));
+```
+
+这些指针数组与 C/C++ 构造函数和析构函数的启动以及删除，以及在 main() 之前/之后调用的代码有关。名为.init，.ctors，.preinit_array 和 .init_array 的 section 与 C/C++ 对象的初始化有关，而 .fini，.fini_array 和 .dtors 的 section 用于删除或者说是析构。开头(__preinit_array_start)和结尾(__preinit_array_end)的符号用来定义与此类操作相关的代码 section 的开头和结尾，并且可以从运行时支持代码的其他部分中引用。
+
+.preinit_array 和 .init_array 部分包含指向将在初始化时调用的函数的指针数组。.fini_array 是在销毁时调用的函数数组，而开始和结束标签用于遍历这些列表。
+
+```
+  .data : 
+  {
+    . = ALIGN(4);
+    _sdata = .;        /* create a global symbol at data start */
+    *(.data)           /* .data sections */
+    *(.data*)          /* .data* sections */
+
+    . = ALIGN(4);
+    _edata = .;        /* define a global symbol at data end */
+  } >RAM AT> FLASH
+```
+
+.data section 包含所有初始化的全局变量和静态变量，启动代码将从 .data section 的 LMA 复制到 .data section 的 VMA。 为了进一步说明这一点，.data section 的静态变量和全局变量需要存储在两个不同的位置：
+
+1. VMA（虚拟内存地址）：编译后代码的变量的运行地址。 这在RAM中，以 > RAM 表示。
+2. LMA（装载存储器地址）：初始化数据存储的地址。 这在 Flash 中以 AT 表示，如果不添加 AT 这个命令，编译地址将会连续，即中间数据会以0来填充，生成的 .bin 文件将会变得极大。
+
 
 
 
