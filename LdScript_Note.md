@@ -355,7 +355,7 @@ SECTION-NAME [ADDRESS] [(TYPE)] : [AT(LMA)]
 
 这段脚本所描述的内容是将预初始化函数数组链接到 Flash 中。
 
-该关键字定义一个（目标文件内被引用但没定义）符号。相当于定义一个全局变量，其他C文件可以引用它。例如，传统的链接器定义了符号 “etext”。 但是，ANSI C 要求用户能够使用 “etext” 作为函数名称，而不会遇到错误。 仅当引用但未定义 PROVIDE 关键字时，才可以使用它来定义符号，就像 “etext”。 语法为 PROVIDE（symbol（symbol = expression）。而 PROVIDE_HIDDEN 与 PROVIDE 类似，作用相同。
+PROVIDE_HIDDEN 关键字定义一个（目标文件内被引用但没定义）符号，相当于定义一个全局变量，其他C文件可以引用它。例如，传统的链接器定义了符号 “etext”。 但是，ANSI C 要求用户能够使用 “etext” 作为函数名称，而不会遇到错误。 仅当引用但未定义 PROVIDE 关键字时，才可以使用它来定义符号，就像 “etext”。 语法为 PROVIDE（symbol（symbol = expression）。而 PROVIDE_HIDDEN 与 PROVIDE 类似，作用相同。
 
 ```
   .init_array :
