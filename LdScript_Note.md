@@ -353,7 +353,7 @@ SECTION-NAME [ADDRESS] [(TYPE)] : [AT(LMA)]
   } >FLASH
 ```
 
-这段脚本所描述的内容是预初始化数组的定义。
+这段脚本所描述的内容是将预初始化函数数组链接到 Flash 中。
 
 该关键字定义一个（目标文件内被引用但没定义）符号。相当于定义一个全局变量，其他C文件可以引用它。例如，传统的链接器定义了符号 “etext”。 但是，ANSI C 要求用户能够使用 “etext” 作为函数名称，而不会遇到错误。 仅当引用但未定义 PROVIDE 关键字时，才可以使用它来定义符号，就像 “etext”。 语法为 PROVIDE（symbol（symbol = expression）。而 PROVIDE_HIDDEN 与 PROVIDE 类似，作用相同。
 
@@ -367,7 +367,7 @@ SECTION-NAME [ADDRESS] [(TYPE)] : [AT(LMA)]
   } >FLASH
   ```
 
-这段脚本所描述的内容是初始化数组的定义。
+这段脚本所描述的内容是将初始化函数数组链接到 Flash 中。
 
 ```
   .fini_array :
@@ -379,7 +379,7 @@ SECTION-NAME [ADDRESS] [(TYPE)] : [AT(LMA)]
   } >FLASH
 ```
 
-这段脚本所描述的是用于析构或者说是删除的数组的定义。
+这段脚本所描述的是将析构或者说是删除的函数数组链接到 Flash 中。
 
 看到这里，可能大家都还在云里雾里，不明白以上的脚本究竟有什么用，别急，下面我会继续给大家解析，但在解释以上脚本时我们先看看下面的符号：
 
@@ -398,6 +398,8 @@ extern void (*__fini_array_end []) (void) __attribute__((weak));
 .preinit_array 和 .init_array 部分包含指向将在初始化时调用的函数的指针数组。.fini_array 是在销毁时调用的函数数组，而开始和结束标签用于遍历这些列表。
 
 ```
+  _sidata = LOADADDR(.data);
+
   .data : 
   {
     . = ALIGN(4);
@@ -413,9 +415,67 @@ extern void (*__fini_array_end []) (void) __attribute__((weak));
 .data section 包含所有初始化的全局变量和静态变量，启动代码将从 .data section 的 LMA 复制到 .data section 的 VMA。 为了进一步说明这一点，.data section 的静态变量和全局变量需要存储在两个不同的位置：
 
 1. VMA（虚拟内存地址）：编译后代码的变量的运行地址。 这在RAM中，以 > RAM 表示。
-2. LMA（装载存储器地址）：初始化数据存储的地址。 这在 Flash 中以 AT 表示，如果不添加 AT 这个命令，编译地址将会连续，即中间数据会以0来填充，生成的 .bin 文件将会变得极大。
+2. LMA（装载存储器地址）：初始化数据存储的地址。 这在 Flash 中以 AT 表示，如果不添加 AT 这个命令，编译地址将会连续，中间数据会以0来填充，生成的 .bin 文件将会变得极大。
 
+```
+ _siccmram = LOADADDR(.ccmram);
 
+  .ccmram :
+  {
+    . = ALIGN(4);
+    _sccmram = .;       /* create a global symbol at ccmram start */
+    *(.ccmram)
+    *(.ccmram*)
+    
+    . = ALIGN(4);
+    _eccmram = .;       /* create a global symbol at ccmram end */
+  } >CCMRAM AT> FLASH
+```
 
+这段脚本用于在链接器中指明，代码段将从 .ccmram section 的 LMA 复制到 .ccmram section 的 VMA。但若想使用 MCU 的 CCM RAM 仍需做额外的修改处理，我们现在看的 .ld 文件是 ST 默认的，只能使用 128KB 的 SRAM，没法使用 64KB CCM SRAM。修改内容我已在 <a href = "https://github.com/laneston/STM32_RTOS_GUN">STM32_RTOS_GUN</a> 的 README 中说明。
 
+```
+  . = ALIGN(4);
+  .bss :
+  {
+    /* This is used by the startup in order to initialize the .bss secion */
+    _sbss = .;         /* define a global symbol at bss start */
+    __bss_start__ = _sbss;
+    *(.bss)
+    *(.bss*)
+    *(COMMON)
 
+    . = ALIGN(4);
+    _ebss = .;         /* define a global symbol at bss end */
+    __bss_end__ = _ebss;
+  } >RAM
+  ```
+
+这段脚本用来将程序中未初始化的全局变量链接到 RAM 中。
+
+```
+  ._user_heap_stack :
+  {
+    . = ALIGN(4);
+    PROVIDE ( end = . );
+    PROVIDE ( _end = . );
+    . = . + _Min_Heap_Size;
+    . = . + _Min_Stack_Size;
+    . = ALIGN(4);
+  } >RAM  
+```
+
+这部分用于检查是否还有足够的RAM。
+
+```
+  /DISCARD/ :
+  {
+    libc.a ( * )
+    libm.a ( * )
+    libgcc.a ( * )
+  }
+```
+
+这是特殊输出 section 名称 / DISCARD / ，可用于丢弃输入节。任何分配给名为“ / DISCARD /”的输出节的输入节不包含在输出文件中。简而言之，这段脚本是用户删除标准库编译的中间信息。
+
+到这里为止我们基本上将 STM32F4 的 LD 文件解析完毕了。但我想很多朋友还是不太明白，因为其中很多内容是来自 <a href = "https://sourceware.org/binutils/docs/ld/"> GNU Binutils </a>，这篇文章只是基于这个手册的部分内容进行简单说明，至于更加详细的操作事项，需要阅读这个手册。
