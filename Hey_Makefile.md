@@ -1,6 +1,6 @@
 本篇文章将会用两个例子来说明 Makefile 是如何运行的，笔者的目的是用较小的篇幅来概括初学者在编写 Makefile 时会遇到的问题，在看完这篇文章后，也能开始写自己的 Makefile 。
 
-- 平台：Ubuntu 20
+- 平台: Ubuntu 20
 - 工具: make, gcc
 
 # 什么是Makefile
