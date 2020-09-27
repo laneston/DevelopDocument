@@ -27,3 +27,9 @@
 **6. <a href="https://github.com/laneston/Note/blob/master/LdScript_Note.md"> LdScript_Note </a>**
 
 本篇文章主要围绕项目 <a href = "https://github.com/laneston/STM32_RTOS_GUN">STM32_RTOS_GUN</a> 的链接脚本 STM32F417IG_FLASH.ld 进行分析，同时对编写链接脚本的方法进行相应的讲解，尽可能地做到通过阅读这篇文章后能够学会编写简单的链接脚本。
+
+**6. <a href="https://github.com/laneston/Note/blob/master/quicksort_Note.md"> Hey 快速排序! </a>**
+
+通过一趟排序将要排序的数据分割成独立的两部分，其中一部分的所有数据都比另一部分的所有数据都要小，然后再按此方法对这两部分数据分别进行快速排序，整个排序过程可以递归进行，以此达到整个数据标称有序序列。
+
+
