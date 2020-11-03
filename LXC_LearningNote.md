@@ -6,8 +6,8 @@
 <a href="#Namespace">Namespace</a>
 - <a href="#Types of namespace">Namespace的种类</a>
 - <a href="#Use of namespace">Namespace的使用</a>
-- <a href="#features">features</a>
-- <a href="#features">features</a>
+- <a href="#Notes on using namespace">Namespace使用注意事项</a>
+- <a href="#Functions and features of namespace">Namespace的功能和特性</a>
 - <a href="#features">features</a>
 - <a href="#features">features</a>
 
@@ -102,4 +102,57 @@ int setns(int fd, int nstype);
 它的参数描述如下：
 
 - fd：表示文件描述符，前面提到可以通过打开 /proc/$pid/ns/ 的方式将指定的 Namespace 保留下来，也就是说可以通过文件描述符的方式来索引到某个 Namespace。
-- nstype：用来检查fd关联Namespace是否与nstype表明的Namespace一致，如果填0的话表示不进行该项检查。
+- nstype：用来检查 fd 关联 Namespace 是否与 nstype 表明的 Namespace 一致，如果填 0 的话表示不进行该项检查。
+
+**unshare函数**
+
+unshare() 系统调用函数用于将当前进程和所在的 Namespace 分离，并加入到一个新的 Namespace 中，相对于 setns() 系统调用来说，unshare() 不用关联之前存在的 Namespace，只需要指定需要分离的 Namespace 就行，该调用会自动创建一个新的 Namespace。
+
+unshare()的函数描述如下：
+
+```
+int unshare(int flags);
+```
+
+其中 flags 用于指明要分离的资源类别，它支持的 flag s与 clone 系统调用支持的 flags 类似，这里简要的叙述一下几种标志：
+
+- CLONE_FILES: 子进程一般会共享父进程的文件描述符，如果子进程不想共享父进程的文件描述符了，可以通过这个flag来取消共享;
+- CLONE_FS: 使当前进程不再与其他进程共享文件系统信息;
+- CLONE_SYSVSEM: 取消与其他进程共享SYS V信号量;
+- CLONE_NEWIPC: 创建新的IPC Namespace，并将该进程加入进来。
+
+## Namespace使用注意事项
+
+unshare() 和 setns() 系统调用对 PID Namespace 的处理不太相同，当 unshare PID namespace 时，调用进程会为它的子进程分配一个新的 PID Namespace，但是调用进程本身不会被移到新的 Namespace 中。而且调用进程第一个创建的子进程在新 Namespace 中的PID 为1，并成为新 Namespace 中的 init 进程。
+
+setns()系统调用也是类似的，调用者进程并不会进入新的 PID Namespace，而是随后创建的子进程会进入。
+
+为什么创建其他的 Namespace 时 unshare() 和 setns() 会直接进入新的 Namespace，而唯独 PID Namespace 不是如此呢？
+
+因为调用 getpid() 函数得到的 PID 是根据调用者所在的 PID Namespace 而决定返回哪个 PID，进入新的 PID namespace 会导致 PID 产生变化。而对用户态的程序和库函数来说，他们都认为进程的 PID 是一个常量，PID 的变化会引起这些进程奔溃。
+
+换句话说，一旦程序进程创建以后，那么它的 PID namespace 的关系就确定下来了，进程不会变更他们对应的 PID namespace。
+
+## Namespace的功能和特性
+
+**Mount Namespace**
+
+Mount Namespace 用来隔离文件系统的挂载点，不同 Mount Namespace 的进程拥有不同的挂载点，同时也拥有了不同的文件系统视图。Mount Namespace 是历史上第一个支持的 Namespace，它通过 CLONE_NEWNS 来标识的。
+
+**挂载的概念**
+
+在Windows下，mount 挂载，就是给磁盘分区提供一个盘符。比如插入U盘后系统自动分配给了它 I:盘符 。这其实就是挂载，退U盘的时候进行安全弹出，其实就是卸载 unmount。
+
+mount 所达到的效果是：像访问一个普通的文件一样访问位于其他设备上文件系统的根目录，也就是将该设备上目录的根节点挂到了另外一个文件系统的页节点上，达到给这个文件系统扩充容量的目的。
+
+可以通过/proc文件系统查看一个进程的挂载信息，具体做法如下：
+
+```
+cat /proc/$pid/mountinfo
+```
+
+输出格式如下：
+
+|36|35|98:0|/mnt1|/mnt2|rw,noatime|master:1|-|ext3|/dev/root|rw,error=continue|
+|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
+|1|2|3|4|5|6|7|8|9|10|11|
