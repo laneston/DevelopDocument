@@ -169,3 +169,24 @@ cat /proc/$pid/mountinfo
 9. filesystem type: 文件系统类型 type[.subtype]；
 10. mount source: 文件系统相关的信息，或者none；
 11. super options: 一些高级选项(文件系统超级块的选项)。
+
+**UTS Namespace**
+
+UTS Namespace 提供了主机名和域名的隔离，也就是 struct utsname 里的 nodename 和 domainname 两个字段。不同 Namespace 中可以拥有独立的主机名和域名。那么为什么需要对主机名和域名进行隔离呢？因为主机名和域名可以用来代替IP地址，如果没有这一层隔离，同一主机上不同的容器的网络访问就可能出问题。
+
+**IPC Namespace**
+
+IPC Namespace是对进程间通信的隔离，进程间通信常见的方法有信号量、消息队列和共享内存。IPC Namespace主要针对的是SystemV IPC和Posix消息队列，这些IPC机制都会用到标识符，比如用标识符来区分不同的消息队列，IPC Namespace要达到的目标是相同的标识符在不同的Namepspace中代表不同的通信介质(比如信号量、消息队列和共享内存)。
+
+# Cgroups
+
+## Cgroups
+
+Cgroups 是 Linux 内核提供的一种机制，这种机制可以根据特定的行为，把一系列系统任务及其子任务整合（或分隔）到按资源划分等级的不同组内，从而为系统资源管理提供一个统一的框架。
+
+
+
+
+Cgroups 可以限制、记录、隔离进程组所使用的物理资源（包括：CPU、memory、IO等），它本质上是系统内核附加在程序上的，为容器实现虚拟化提一系列钩子，通过程序运行时对资源的调度触发相应的钩子，从而达到资源追踪和限制的目的。供了基本保证，是构建Docker等一系列虚拟化管理工具的基石。
+
+https://www.jianshu.com/p/052e3d5792ee
