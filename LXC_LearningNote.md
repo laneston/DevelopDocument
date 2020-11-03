@@ -1,3 +1,18 @@
+<a href="#Container overview">容器概述</a>
+- <a href="#Container and virtual machine">容器与虚拟机</a>
+- <a href="#Why use containers">为什么要用容器</a>
+- <a href="#What is LXC">什么是LXC</a>
+
+<a href="#Namespace">Namespace</a>
+- <a href="#Types of namespace">Namespace的种类</a>
+- <a href="#Use of namespace">Namespace的使用</a>
+- <a href="#features">features</a>
+- <a href="#features">features</a>
+- <a href="#features">features</a>
+- <a href="#features">features</a>
+
+# 容器概述
+
 ## 容器与虚拟机
 
 容器是一种基于操作系统层级的虚拟化技术。“容器”是轻量级的虚拟化技术，与我们常用的 VMware 虚拟机不同，因为 LXC 不仿真硬件，且由于容器与主机共享相同的操作系统，共用相同的硬件资源，而虚拟机是寄生在宿主系统上的软件，与宿主系统或其它寄生系统抢占硬件的资源。
