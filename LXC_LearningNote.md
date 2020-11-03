@@ -156,3 +156,16 @@ cat /proc/$pid/mountinfo
 |36|35|98:0|/mnt1|/mnt2|rw,noatime|master:1|-|ext3|/dev/root|rw,error=continue|
 |:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
 |1|2|3|4|5|6|7|8|9|10|11|
+
+
+1. mount ID: 对于 mount 操作一个唯一的ID；
+2. parent ID: 父挂载的 mount ID 或者本身的mount ID(本身是挂载树的顶点)；
+3. major:minor: 文件关联额设备的主次设备号；
+4. root: 文件系统的路径名，这个路径名是挂载点的根；
+5. mount point: 挂载点的文件路径名(相对于这个进程的跟目录)；
+6. mount options: 挂载选项
+7. optional fields: 可选项，格式 tag:value；
+8. separator: 分隔符，可选字段由这个单个字符标示结束的；
+9. filesystem type: 文件系统类型 type[.subtype]；
+10. mount source: 文件系统相关的信息，或者none；
+11. super options: 一些高级选项(文件系统超级块的选项)。
