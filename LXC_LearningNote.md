@@ -8,7 +8,11 @@
 - <a href="#Use of namespace">Namespace的使用</a>
 - <a href="#Notes on using namespace">Namespace使用注意事项</a>
 - <a href="#Functions and features of namespace">Namespace的功能和特性</a>
-- <a href="#features">features</a>
+
+<a href="#Cgroups">Cgroups</a>
+- <a href="#what is Cgroups">什么是Cgroups</a>
+- <a href="#the function of Cgroups">Cgroups的功能</a>
+- <a href="#Introduction to subsystem">子系统简介</a>
 - <a href="#features">features</a>
 
 # 容器概述
@@ -180,13 +184,65 @@ IPC Namespace是对进程间通信的隔离，进程间通信常见的方法有�
 
 # Cgroups
 
-## Cgroups
+## 什么是Cgroups
 
-Cgroups 是 Linux 内核提供的一种机制，这种机制可以根据特定的行为，把一系列系统任务及其子任务整合（或分隔）到按资源划分等级的不同组内，从而为系统资源管理提供一个统一的框架。
+Cgroups 是 Linux 内核提供的一种机制，这种机制可以根据特定的行为，把一系列系统任务及其子任务整合（或分隔）到按资源划分等级的不同组内，从而为系统资源管理提供一个统一的框架。Cgroups 可以限制、记录、隔离进程组所使用的物理资源（包括：CPU、memory、IO等），它本质上是系统内核附加在程序上的，为容器实现虚拟化提供的一系列钩子，通过程序运行时对资源的调度触发相应的钩子，从而达到资源追踪和限制的目的。供了基本保证，是构建 Docker 等一系列虚拟化管理工具的基石。
 
+## Cgroups的功能
 
+cgroups 的一个设计目标是为不同的应用情况提供统一的接口，从控制单一进程到操作系统层虚拟化（像OpenVZ，Linux-VServer，LXC）。cgroups 提供：
 
+- 资源限制：组可以被设置不超过设定的内存限制；这也包括虚拟内存。
+- 优先级：一些组可能会得到大量的CPU或磁盘IO吞吐量。
+- 结算：用来衡量系统确实把多少资源用到适合的目的上。
+- 控制：冻结组或检查点和重启动。
 
-Cgroups 可以限制、记录、隔离进程组所使用的物理资源（包括：CPU、memory、IO等），它本质上是系统内核附加在程序上的，为容器实现虚拟化提一系列钩子，通过程序运行时对资源的调度触发相应的钩子，从而达到资源追踪和限制的目的。供了基本保证，是构建Docker等一系列虚拟化管理工具的基石。
+Cgroups 最初的目标是为资源管理提供的一个统一的框架，既整合现有的 cpuset 等子系统，也为未来开发新的子系统提供接口。现在的 cgroups 适用于多种应用场景，从单个进程的资源控制，到实现操作系统层次的虚拟化（OS Level Virtualization）。Cgroups 提供了以下功能：
 
-https://www.jianshu.com/p/052e3d5792ee
+1.限制进程组可以使用的资源数量（Resource limiting ）。比如：memory 子系统可以为进程组设定一个 memory 使用上限，一旦进程组使用的内存达到限额再申请内存，就会触发OOM（out of memory）。
+2.进程组的优先级控制（Prioritization ）。比如：可以使用cpu子系统为某个进程组分配特定cpu share。
+3.记录进程组使用的资源数量（Accounting ）。比如：可以使用cpuacct子系统记录某个进程组使用的cpu时间
+4.进程组隔离（Isolation）。比如：使用ns子系统可以使不同的进程组使用不同的namespace，以达到隔离的目的，不同的进程组有各自的进程、网络、文件系统挂载空间。
+5.进程组控制（Control）。比如：使用freezer子系统可以将进程组挂起和恢复。
+
+## 子系统简介
+
+- blkio： 这个子系统为块设备设定输入/输出限制，比如物理设备（磁盘，固态硬盘，USB 等等）。
+- cpu： 这个子系统使用调度程序提供对 CPU 的 cgroup 任务访问。
+- cpuacct： 这个子系统自动生成 cgroup 中任务所使用的 CPU 报告。
+- cpuset：这个子系统为 cgroup 中的任务分配独立 CPU（在多核系统）和内存节点。
+- devices： 这个子系统可允许或者拒绝 cgroup 中的任务访问设备。
+- freezer：这个子系统挂起或者恢复 cgroup 中的任务。
+- memory：这个子系统设定 cgroup 中任务使用的内存限制，并自动生成由那些任务使用的内存资源报告。
+- net_cls：这个子系统使用等级识别符（classid）标记网络数据包，可允许 Linux 流量控制程序（tc）识别从具体 cgroup 中生成的数据包。
+- ns： 名称空间子系统。
+
+## 如何管理控制群组
+
+Cgroup 是透过阶层式的方式来管理的，和程序、子群组相同，都会由它们的 parent 继承部份属性。然而，这两个模型之间有所不同。
+
+### Linux 程序模型
+
+Linux 系统上的所有程序皆为相同 parent 的子程序：init 程序，由 kernel 在开机时执行，并启用其它程序（并且可能会相应地启用它们自己的子程序）。因为所有程序皆源自於单独的父程序，因此 Linux 的程序模型属於单独的阶层或树状目录。
+此外，所有除了init以外的程序皆会继承其父程序的环境（例如 PATH 变数）与特定属性（例如开放式的档案描述元）。
+
+## Cgroup 模型
+
+Cgroup 与程序的相似点为：
+
+它们皆属於阶层式，并且子 cgroup 会继承其父群组的特定属性。基础差异就是在同一部系统上，能够同时存在许多不同的 cgroup 阶层。若 Linux 程序模型是个程序的单树状，那麼 cgroup 模型便是个各别、未连接的树状工作（例如程序）。
+
+多重各别的 cgroup 阶层是必要的，因为各个阶层皆连至了「一个或更多」个「子系统」。子系统代表单独的资源，例如 CPU 时间或记忆体。Red Hat Enterprise Linux 6 提供了九个控制群组子系统，以名称和功能列在下方。
+
+Red Hat Enterprise Linux 中的可用子系统:
+
+1. blki 此子系统可设置来自於，以及至区块装置（例如像是固态、USB 等等的实体磁碟）的输入/输出存取限制。
+2. cpu 此子系统使用了排程器，以提供 CPU cgroup 工作的存取权限。
+3. cpuacct 此子系统会自动产生 cgroup 中的工作所使用的 CPU 资源报告。
+4. cpuset 此子系统会将个别的 CPU 与记忆体节点分配给 cgroup 中的工作。
+5. devices 此子系统能允许或拒绝控制群组中的任务存取装置。
+6. freezer 此子系统可中止或复原控制群组中的工作。
+7. memory 此子系统会根据使用於控制群组中的工作的记忆体资源，自动产生记忆体报告，然後设定这些工作所能使用的记忆体限制：
+8. net_cls 此子系统会以一个 class 标识符号（classid）来标记网路封包，这能让 Linux 流量控制器（tc）辨识源自於特定控制群组的封包。流量控制器能被配置来指定不同的优先顺序给来自於不同控制群组的封包。
+9. ns namespace子系统。
+
