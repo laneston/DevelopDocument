@@ -13,7 +13,7 @@
 - <a href="#what is Cgroups">什么是Cgroups</a>
 - <a href="#the function of Cgroups">Cgroups的功能</a>
 - <a href="#Introduction to subsystem">子系统简介</a>
-- <a href="#features">features</a>
+- <a href="#How to manage control group">如何管理控制群组</a>
 
 # 容器概述
 
@@ -226,7 +226,7 @@ Cgroup 是透过阶层式的方式来管理的，和程序、子群组相同，�
 Linux 系统上的所有程序皆为相同 parent 的子程序：init 程序，由 kernel 在开机时执行，并启用其它程序（并且可能会相应地启用它们自己的子程序）。因为所有程序皆源自於单独的父程序，因此 Linux 的程序模型属於单独的阶层或树状目录。
 此外，所有除了init以外的程序皆会继承其父程序的环境（例如 PATH 变数）与特定属性（例如开放式的档案描述元）。
 
-## Cgroup 模型
+### Cgroup 模型
 
 Cgroup 与程序的相似点为：
 
