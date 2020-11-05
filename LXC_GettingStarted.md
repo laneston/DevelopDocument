@@ -226,7 +226,6 @@ shadow 是一个文件，它包含系统账户的密码信息和可选的年龄�
 
 此字段保留作将来使用。
 
-
 <h3 id="libpam-cgfs">libpam-cgfs</h3>
 
 <a href="https://reposcope.com/package/libpam-cgfs">libpam-cgfs</a> 是用于管理 LXC 的 cgroup 的 PAM 模块。
@@ -235,7 +234,31 @@ shadow 是一个文件，它包含系统账户的密码信息和可选的年龄�
 
 ## 作为root用户创建非权限容器
 
+要运行系统范围内的非特权容器（即由root用户启动的非特权容器），只需执行上述步骤的一个子集。
+
+具体来说，你需要手动将 uid 和 gid 范围分配给 /etc/subuid 和 /etc/subgid 的根目录。然后使用与上面类似的 lxc.idmap 条目在 /etc/lxc/default.conf 中设置该范围。
+
+Root 不需要网络设备配额，并且使用全局配置文件，因此其他步骤不适用。此时，作为根用户创建的任何容器都将以非特权运行。
 
 ## 创建权限容器
+
+权限容器是 root 用户创建的工作在 root 模式下的容器。
+
+根据Linux发行版的不同，通过一些功能删除、apparmor 配置文件、selinux 上下文或 seccomp 策略，它们可能受到保护。但最终，进程仍以root身份运行，因此你永远不应将对特权容器中 root 的访问权限授予不受信任的一方。
+
+**注：**
+
+*seccomp 是内核提供的一种SYSCALL过滤机制，它基于 BPF 过滤方法，通过写入BPF过滤器代码来达到过滤的目的。BPF 规则语言原生是为了过滤网络包，情景比较复杂。针对 SYSCALL 场景，语法比较固定，可以自行撰写，也可以基于 Libseccomp 库提供的 API 来编写。*
+
+*因为程序在 fork/clone 或 execve 时，BPF filter 会从父进程继承到子进程，所以如果想控制第三方的程序调用SYSCALL，只需要在 fork/clone 或者 execve 时，传入合适的 sock_filter 即可。*
+
+如果您仍然需要创建特权容器，这很简单。只要不做上述任何配置，LXC就会创建特权容器。
+
+```
+sudo lxc-create -t download -n privileged-container
+```
+
+这将会使用一个下载模板镜像来创建一个新的 "privileged-container" 特权容器在你的系统中。
+
 
 
