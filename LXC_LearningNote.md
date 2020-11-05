@@ -199,11 +199,11 @@ cgroups 的一个设计目标是为不同的应用情况提供统一的接口，
 
 Cgroups 最初的目标是为资源管理提供的一个统一的框架，既整合现有的 cpuset 等子系统，也为未来开发新的子系统提供接口。现在的 cgroups 适用于多种应用场景，从单个进程的资源控制，到实现操作系统层次的虚拟化（OS Level Virtualization）。Cgroups 提供了以下功能：
 
-1.限制进程组可以使用的资源数量（Resource limiting）。比如：memory 子系统可以为进程组设定一个 memory 使用上限，一旦进程组使用的内存达到限额再申请内存，就会触发OOM（out of memory）。
-2.进程组的优先级控制（Prioritization）。比如：可以使用cpu子系统为某个进程组分配特定cpu share。
-3.记录进程组使用的资源数量（Accounting）。比如：可以使用cpuacct子系统记录某个进程组使用的cpu时间
-4.进程组隔离（Isolation）。比如：使用ns子系统可以使不同的进程组使用不同的namespace，以达到隔离的目的，不同的进程组有各自的进程、网络、文件系统挂载空间。
-5.进程组控制（Control）。比如：使用freezer子系统可以将进程组挂起和恢复。
+1. 限制进程组可以使用的资源数量（Resource limiting）。比如：memory 子系统可以为进程组设定一个 memory 使用上限，一旦进程组使用的内存达到限额再申请内存，就会触发OOM（out of memory）。
+2. 进程组的优先级控制（Prioritization）。比如：可以使用cpu子系统为某个进程组分配特定cpu share。
+3. 记录进程组使用的资源数量（Accounting）。比如：可以使用cpuacct子系统记录某个进程组使用的cpu时间
+4. 进程组隔离（Isolation）。比如：使用ns子系统可以使不同的进程组使用不同的namespace，以达到隔离的目的，不同的进程组有各自的进程、网络、文件系统挂载空间。
+5. 进程组控制（Control）。比如：使用freezer子系统可以将进程组挂起和恢复。
 
 <h3 id="Introduction to subsystem">子系统简介</h3>
 
