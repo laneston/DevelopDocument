@@ -1,6 +1,7 @@
 
-# 编译准备
+硬件平台：MT7622
 
+# 编译准备
 
 ## 软件安装
 
@@ -75,6 +76,10 @@ sudo apt-get install mercurial
 在 <a href = "https://openwrt.org/downloads"> OpenWrt </a> 官网上下载你想要的版本的固件。
 
 <img src="https://github.com/laneston/Pictures/blob/master/Post-OpenWrt/OpenWrt%20kernel.jpg" width="50%" height="50%">
+
+如上图所示，我们选取平台所对应的固件： openwrt-sdk-19.07.4-mediatek-mt7622_gcc-7.5.0_musl.Linux-x86_64.tar
+
+## 开始编译
 
 
 
