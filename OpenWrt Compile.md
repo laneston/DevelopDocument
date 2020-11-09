@@ -79,10 +79,25 @@ sudo apt-get install mercurial
 
 如上图所示，我们选取平台所对应的固件： openwrt-sdk-19.07.4-mediatek-mt7622_gcc-7.5.0_musl.Linux-x86_64.tar
 
-## 开始编译
+# 开始编译
 
+## 更新源(Feeds)
 
+进入 openwrt 固件解压后的文件夹，输入以下命令，更新软件列表，否则会显示有很多软件包不存在。
 
+```
+sudo ./scripts/feeds update -a
+sudo ./scripts/feeds install -a
+```
 
+## 生成配置文件
 
+```
+sudo make defconfig 
+```
 
+## 进入定制界面
+
+```
+sudo make menuconfig
+```
