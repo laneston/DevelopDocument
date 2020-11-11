@@ -78,33 +78,16 @@ sudo apt-get install mercurial
 
 如上图所示，我们选取平台所对应的固件： openwrt-sdk-19.07.4-mediatek-mt7622_gcc-7.5.0_musl.Linux-x86_64.tar
 
-# SDK的使用
-
-SDK 是一个可重定位、预编译的 OpenWrt 工具链，适合于交叉编译特定目标的单个用户空间包，而无需从头开始编译整个系统。
-
-使用SDK的原因是：
-
-- 为特定版本编译自定义软件，同时确保二进制和功能的兼容性；
-- 编译某些包的更新版本；
-- 使用自定义修补程序或不同功能重新编译现有软件包。
-
-## 获取SDK
-
-您可以下载已经编译的 SDK，也可以使用 “make menuconfig” 命令自己编译。
-
-## 先决条件
-
-请参阅 [软件安装](##软件安装) 页面以安装在 SDK 上构建包所需的软件。
-
-值得注意的是：在一些主机上，需要安装 ccache 包。
-
-## Package Feeds
-
-解压缩SDK存档文件后，编辑 feeds.conf.default 文件以下载所需的包定义。
-
-默认情况下，SDK没有包定义。要编译的包的 makefile 必须首先从 OpenWrt 存储库签出并放入 package/ 目录中。
-
 # 开始编译
+
+进入待编译目录。
+
+## 更新软件包
+
+```
+sudo ./scripts/feeds update -a
+sudo ./scripts/feeds install -a
+```
 
 ## 生成配置文件
 
