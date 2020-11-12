@@ -4,12 +4,18 @@
 - <a href="#HOSTNAME ">主机名称</a>
 - <a href="#HALT SIGNAL ">停止信号</a>
 - <a href="#REBOOT SIGNAL ">重启信号</a>
+- <a href="#INIT COMMAND ">初始化命令</a>
+- <a href="#INIT WORKING DIRECTORY ">初始化工作路径</a>
+- <a href="#PROC ">PROC</a>
+- <a href="#EPHEMERAL ">EPHEMERAL</a>
 - <a href="# "></a>
-- - <a href="# "></a>
-- - <a href="# "></a>
-- - <a href="# "></a>
-- - <a href="# "></a>
-
+- <a href="# "></a>
+- <a href="# "></a>
+- <a href="# "></a>
+- <a href="# "></a>
+- <a href="# "></a>
+- <a href="# "></a>
+- <a href="# "></a>
 
 <h2 id="DESCRIPTION">概述</h2>
 
@@ -62,8 +68,93 @@ lxc.signal.halt = parameter
 
 <h2 id="REBOOT SIGNAL">重启信号</h2>
 
-允许指定信号名称或编号去重新启动容器。此选项允许以kill（1）方式指定信号，例如 SIGTERM、SIGRTMIN+14、SIGRTMAX-10 或普通数字。默认信号是 SIGINT。
+允许指定信号名称或编号用作重新启动容器。此选项允许以kill（1）方式指定信号，例如 SIGTERM、SIGRTMIN+14、SIGRTMAX-10 或普通数字。默认信号是 SIGINT。
 
 ```
 lxc.signal.reboot = parameter
 ```
+
+<h2 id="STOP  SIGNAL">停止信号</h2>
+
+允许指定信号名称或编号用作强制关闭容器。此选项允许以kill（1）方式指定信号，例如 SIGKILL、SIGRTMIN+14、SIGRTMAX-10 或普通数字。默认信号是 SIGKILL。
+
+```
+lxc.signal.stop = parameter
+```
+
+<h2 id="INIT COMMAND">初始化命令</h2>
+
+设置此命令用作初始化容器的操作。
+
+```
+lxc.execute.cmd
+```
+
+这是从容器 rootfs 的绝对路径到二进制文件的默认执行方式，这与 lxc-execute 是相等的。
+
+```
+lxc.init.cmd = /sbin/init.
+```
+
+这是从容器 rootfs 的绝对路径到二进制文件的初始化方式。这与 lxc-start 是等同的。默认值是 /sbin/init.
+
+
+<h2 id="INIT WORKING DIRECTORY">初始化工作路径</h2>
+
+将容器内的绝对路径设置为容器的工作目录。在执行 init 之前，LXC 将切换到这个目录。
+
+```
+lxc.init.cwd 
+```
+
+容器中用作工作目录的绝对路径。
+
+
+<h2 id="INIT ID">初始化ID</h2>
+
+设置用于 init 系统和后续命令的 UID/GID。请注意，由于缺少权限，在引导系统容器时使用非根 UID 可能无法工作。在运行应用程序容器时，设置 UID/GID 非常有用。默认为：UID（0），GID（0）
+
+```
+lxc.init.uid = parameter
+lxc.init.gid = parameter
+```
+
+
+<h2 id="PROC">PROC</h2>
+
+配置容器 pro 文件系统。
+
+```
+lxc.proc.[proc file name]
+```
+
+指定要设置的 proc 文件名。可用的文件名是 /proc/PID/ 列出的文件名。例如：
+
+```
+lxc.proc.oom_score_adj = 10
+```
+
+
+
+
+<h2 id="EPHEMERAL">EPHEMERAL</h2>
+
+允许指定容器是否在关闭时销毁。
+
+```
+lxc.ephemeral = parameter
+```
+
+唯一允许的值是 0 和 1。将此设置为 1 可在关闭时销毁容器。
+
+
+
+<h2 id=""></h2>
+
+<h2 id=""></h2>
+
+<h2 id=""></h2>
+
+<h2 id=""></h2>
+
+<h2 id=""></h2>
