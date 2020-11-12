@@ -170,12 +170,13 @@ network 部分定义如何在容器中虚拟化网络。网络虚拟化作用于
 
 [i].veth.ipv4.route 和 lxc.net.[i].veth.ipv6.route 选项。多条线指定多个路由。路线的格式为 x.y.z.t/m  例如 192.168.1.0/24
 
+在网桥模式下，可以使用lxc.net.[i].veth.vlan.id 选项设置未标记的VLAN成员身份。它接受一个特殊值 'none' ，表示应该从网桥的默认未标记 VLAN 中删除容器端口。lxc.net.[i].veth.vlan.tagged.id 选项可以被多次指定，以将容器的网桥端口成员身份设置为一个或多个标记的 VLAN。
 
+**vlan：** vlan 接口与 lxc.net.[i].link 指定的接口链接并分配给容器。vlan标识符是用选项 lxc.net.[i].vlan.id 指定的。
 
+**macvlan：**
 
-
-
-
+**ipvlan：**
 
 <h2 id=""></h2>
 
