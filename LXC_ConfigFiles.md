@@ -3,8 +3,12 @@
 - <a href="#ARCHITECTURE ">结构</a>
 - <a href="#HOSTNAME ">主机名称</a>
 - <a href="#HALT SIGNAL ">停止信号</a>
+- <a href="#REBOOT SIGNAL ">重启信号</a>
 - <a href="# "></a>
-- <a href="# "></a>
+- - <a href="# "></a>
+- - <a href="# "></a>
+- - <a href="# "></a>
+- - <a href="# "></a>
 
 
 <h2 id="DESCRIPTION">概述</h2>
@@ -50,7 +54,16 @@ lxc.uts.name = parameter
 
 <h2 id="HALT SIGNAL">停止信号</h2>
 
+为了彻底关闭容器，允许指定信号名称或编号发送到容器的 init 进程。不同的 init 系统可以使用不同的信号来执行干净的关闭顺序。此选项允许以 kill（1）方式指定信号，例如 SIGPWR、SIGRTMIN+14、SIGRTMAX-10 或普通数字。默认信号是SIGPWR。
 
+```
+lxc.signal.halt = parameter
+```
 
+<h2 id="REBOOT SIGNAL">重启信号</h2>
 
+允许指定信号名称或编号去重新启动容器。此选项允许以kill（1）方式指定信号，例如 SIGTERM、SIGRTMIN+14、SIGRTMAX-10 或普通数字。默认信号是 SIGINT。
 
+```
+lxc.signal.reboot = parameter
+```
