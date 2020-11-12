@@ -8,7 +8,7 @@
 - <a href="#INIT WORKING DIRECTORY ">初始化工作路径</a>
 - <a href="#PROC ">PROC</a>
 - <a href="#EPHEMERAL ">EPHEMERAL</a>
-- <a href="# "></a>
+- <a href="#NETWORK ">网络</a>
 - <a href="# "></a>
 - <a href="# "></a>
 - <a href="# "></a>
@@ -135,8 +135,6 @@ lxc.proc.oom_score_adj = 10
 ```
 
 
-
-
 <h2 id="EPHEMERAL">EPHEMERAL</h2>
 
 允许指定容器是否在关闭时销毁。
@@ -148,8 +146,32 @@ lxc.ephemeral = parameter
 唯一允许的值是 0 和 1。将此设置为 1 可在关闭时销毁容器。
 
 
+<h2 id="NETWORK">网络</h2>
 
-<h2 id=""></h2>
+network 部分定义如何在容器中虚拟化网络。网络虚拟化作用于第二层。为了使用网络虚拟化，必须指定参数来定义容器的网络接口。即使系统只有一个物理网络接口，也可以在容器中分配和使用多个虚拟接口。
+
+```
+lxc.net
+```
+
+可在没有值的情况下使用，以清除所有以前的网络选项。
+
+```
+lxc.net.[i].type
+```
+
+指定要用于容器的网络虚拟化类型。
+
+
+通过在所有键 lxc\.net.* 之后使用附加索引i可以指定多个网络。
+
+
+
+
+
+
+
+
 
 <h2 id=""></h2>
 
