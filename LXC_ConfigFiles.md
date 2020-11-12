@@ -178,6 +178,46 @@ network 部分定义如何在容器中虚拟化网络。网络虚拟化作用于
 
 **ipvlan：**
 
+**phys：** 已经存在的接口由 lxc.net.[i].link 指定分配给容器。
+
+
+## lxc.net.[i].flags
+
+指定要执行的网络操作。
+
+up：激活接口。
+
+## lxc.net.[i].link
+
+指定用于实际网络流量的接口。
+
+## lxc.net.[i].l2proxy
+
+控制是否将第 2 层 IP 邻居代理项添加到容器的 IP 地址的 lxc.net.[i].link 接口。可以设置为 0 或 1，默认值为 0。与 IPv4 地址一起使用时，需要设置以下 sysctl 值：net.ipv4.conf.[link].forwarding=1 当与 IPv6 地址一起使用时，需要设置以下 sysctl 值：net.ipv6.conf.[link].proxy_ndp=1 net.ipv6.conf.[link].forwarding=1
+
+## lxc.net.[i].mtu
+
+指定此接口的最大传输单位。
+
+## lxc.net.[i].name
+
+接口名称是动态分配的，但是如果由于容器使用的配置文件使用通用名称（例如 eth0）而需要另一个名称，则此选项将重命名容器中的接口。
+
+## lxc.net.[i].hwaddr
+
+默认情况下，接口mac地址是动态分配给虚拟接口的，但在某些情况下，这是解决 mac 地址冲突或始终具有相同的链路本地ipv6 地址所必需的。地址中的任何 “x” 都将被随机值替换，这在模板中是允许被设置的。
+
+## lxc.net.[i].ipv4.address
+
+指定要分配给虚拟化接口的 ipv4 地址。几行指定了几个 ipv4 地址。地址的格式为 x.y.z.t/m，例如 192.168.1.123/24。
+
+## lxc.net.[i].ipv4.gateway
+
+## lxc.net.[i].ipv6.address
+
+
+
+
 <h2 id=""></h2>
 
 <h2 id=""></h2>
