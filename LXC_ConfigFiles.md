@@ -320,4 +320,16 @@ up：激活接口。
 
 ## lxc.cgroup.relative
 
+<h2 id="CAPABILITIES">功能</h2>
 
+如果这个功能是以 root 用户身份运行的，那么可以将这些功能放到容器中。
+
+**lxc.cap.drop**
+
+指定要放入容器中的功能。允许用空格分隔定义多个功能的单行线。格式是能力定义的小写，不带 “CAP_” 前缀，例如，CAP_SYS_MODULE 应该被指定为 sys_module
+
+见 capabilities(7)，如果没有使用任何值，lxc 将清除到目前为止要丢弃的功能。
+
+**lxc.cap.keep**
+
+指定要保存在容器中的功能，所有其他功能都将被放弃。当遇到特殊值 “none” 时，lxc 将清除在此之前指定的任何保持功能。“none” 可单独用于删除所有功能。
