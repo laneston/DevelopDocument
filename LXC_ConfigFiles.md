@@ -353,9 +353,16 @@ ioctl notify
 
 将 “errno” 指定为 action 将导致 LXC 注册一个 seccomp 筛选器，该筛选器将导致向调用方返回特定的 errno。可以在 “errno” 的动作字之后指定 errno 值。
 
-指定 “notify” 作为操作,将导致LXC注册seccomp侦听器并从内核检索侦听器文件描述符。
+指定 “notify” 作为操作，将导致 LXC 注册 seccomp 侦听器，并从内核检索侦听器文件描述符。进行系统调用时，注册为“notify” 的内核将生成轮询事件，并通过文件描述符发送消息。调用者可以读取此消息，检查包括参数在内的系统调用。基于这些信息，调用者应该发回一条消息，通知内核要采取的操作。在该消息被发送之前，内核将阻止调用进程。要读取和发送的消息格式记录在 seccomp 中。
 
+## lxc.seccomp.profile
 
+指定一个包含 seccomp 配置的文件，并在容器开启之前加载。
 
+## lxc.seccomp.allow_nesting
+
+## lxc.seccomp.notify.proxy
+
+## lxc.seccomp.notify.cookie
 
 
