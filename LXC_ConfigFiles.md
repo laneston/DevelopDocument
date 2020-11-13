@@ -333,3 +333,29 @@ up：激活接口。
 **lxc.cap.keep**
 
 指定要保存在容器中的功能，所有其他功能都将被放弃。当遇到特殊值 “none” 时，lxc 将清除在此之前指定的任何保持功能。“none” 可单独用于删除所有功能。
+
+<h2 id="SECCOMP CONFIGURATION">SECCOMP配置</h2>
+
+容器可以通过在启动时加载 seccomp 配置文件，减少可用系统调用的集合。seccomp 配置文件开头格式为：第一行为版本号，第二行为策略类型，然后是配置。
+
+当前支持版本 1 和版本 2。在版本 1 中，策略是一个简单的 allowlist。因此，第二行必须读为 “allowlist” ，文件的其余部分每行包含一个（数字）syscall 编号。每个 syscall 编号都是 allowlisted 的，而每个未列出的编号都被denylisted 以便在容器中使用。
+
+在版本 2 中，策略可以是 denylist 或 allowlist，支持每个规则和每个策略的默认操作，并支持从文本名称按体系结构进行系统调用解析。
+
+denylist 策略的一个示例，在该策略中，除了 mknod 之外，所有系统调用都是允许的，mknod 将不执行任何操作并返回 0（success），例如：
+
+```
+2
+denylist
+mknod errno 0
+ioctl notify
+```
+
+将 “errno” 指定为 action 将导致 LXC 注册一个 seccomp 筛选器，该筛选器将导致向调用方返回特定的 errno。可以在 “errno” 的动作字之后指定 errno 值。
+
+指定 “notify” 作为操作,将导致LXC注册seccomp侦听器并从内核检索侦听器文件描述符。
+
+
+
+
+
