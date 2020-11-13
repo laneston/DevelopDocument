@@ -13,6 +13,7 @@
 - <a href="#CONTAINER SYSTEM CONSOLE">容器系统控制台</a>
 - <a href="#CONSOLE DEVICES LOCATION">控制台设备位置</a>
 - <a href="#DEV DIRECTORY">/DEV 目录</a>
+- <a href="#MOUNT POINTS">挂载点</a>
 - <a href="#ROOT FILE SYSTEM">根文件系统</a>
 - <a href="#CONTROL GROUP">控制组</a>
 - <a href="# "></a>
@@ -268,10 +269,9 @@ up：激活接口。
 
 <h2 id="CONSOLE DEVICES LOCATION">控制台设备位置</h2>
 
-<h2 id="CONSOLE DEVICES LOCATION">控制台设备位置</h2>
-
 <h2 id="DEV DIRECTORY">/DEV 目录</h2>
 
+<h2 id="MOUNT POINTS">挂载点</h2>
 
 <h2 id="ROOT FILE SYSTEM">根文件系统</h2>
 
