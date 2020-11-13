@@ -213,8 +213,25 @@ up：激活接口。
 
 ## lxc.net.[i].ipv4.gateway
 
+指定要用作容器内网关的 ipv4 地址。地址的格式是 x.y.z.t，例如 192.168.1.123。也可以具有特殊值 auto，这意味着从网桥接口获取主地址（由 lxc.net.[i].link 选项）并将其用作网关。仅当使用veth、macvlan 和 ipvlan 网络类型时，auto 才可用。也可以具有特殊值 dev，这意味着将默认网关设置为设备路由。这主要用于第 3 层网络模式，如 IPVLAN。
+
 ## lxc.net.[i].ipv6.address
 
+指定要分配给虚拟化接口的ipv6地址。几行指定了几个 ipv6 地址。地址的格式是 x::y/m，例如 2003:db8:1:0:214:1234:fe0b:3596/64
+
+## lxc.net.[i].ipv6.gateway
+
+指定要用作容器内网关的 ipv6 地址。地址的格式是 x::y，例如 2003:db8:1:0::1 也可以有特殊值 auto，这意味着从网桥接口获取主地址（由 lxc.net.[i].link 选项）并将其用作网关。仅当使用 veth、macvlan 和 ipvlan 网络类型时，auto 才可用。也可以具有特殊值 dev，这意味着将默认网关设置为设备路由。这主要用于第 3 层网络模式，如 IPVLAN。
+
+## lxc.net.[i].script.up
+
+添加一个配置选项，在创建和配置从主机端使用的网络后，用于指定要执行的脚本。除了提供有用信息到所有钩子，以下信息也提供给脚本：
+
+- LXC_HOOK_TYPE：钩子类型，这不是 “up” 就是 “down”。
+- LXC_HOOK_SECTION: 'net' 类型区域。
+- LXC_NET_TYPE: 网络类型，这是此处列出的有效网络类型之一（例如 vlan、macvlan、ipvlan、veth）。
+- LXC_NET_PARENT: 主机上的父设备，这只为网络类型 mavclan、veth、phys 设置。
+- LXC_NET_PEER: 主机上对等设备的名称，这只为 “veth” 网络类型设置。请注意，此信息仅在以下情况下可用 lxc.hook.version 版设置为 1。
 
 
 
