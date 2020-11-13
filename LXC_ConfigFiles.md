@@ -9,7 +9,7 @@
 - <a href="#PROC ">PROC</a>
 - <a href="#EPHEMERAL ">EPHEMERAL</a>
 - <a href="#NETWORK ">网络</a>
-- <a href="# "></a>
+- <a href="#NEW PSEUDO TTY INSTANCE ">NEW PSEUDO TTY INSTANCE (DEVPTS)</a>
 - <a href="# "></a>
 - <a href="# "></a>
 - <a href="# "></a>
@@ -252,7 +252,7 @@ up：激活接口。
 脚本的标准输出在调试级别记录，标准错误不会被记录，但是可以通过钩子将其标准错误重定向到标准输出来捕获。
 
 
-<h2 id=""></h2>
+<h2 id="NEW PSEUDO TTY INSTANCE">NEW PSEUDO TTY INSTANCE (DEVPTS)</h2>
 
 <h2 id=""></h2>
 
