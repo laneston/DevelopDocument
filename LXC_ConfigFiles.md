@@ -1,19 +1,20 @@
-- <a href="#DESCRIPTION ">概述</a>
-- <a href="#CONFIGURATION ">配置事项</a>
-- <a href="#ARCHITECTURE ">结构</a>
-- <a href="#HOSTNAME ">主机名称</a>
-- <a href="#HALT SIGNAL ">停止信号</a>
-- <a href="#REBOOT SIGNAL ">重启信号</a>
-- <a href="#INIT COMMAND ">初始化命令</a>
-- <a href="#INIT WORKING DIRECTORY ">初始化工作路径</a>
-- <a href="#PROC ">PROC</a>
+- <a href="#DESCRIPTION">概述</a>
+- <a href="#CONFIGURATION">配置事项</a>
+- <a href="#ARCHITECTURE">结构</a>
+- <a href="#HOSTNAME">主机名称</a>
+- <a href="#HALT SIGNAL">停止信号</a>
+- <a href="#REBOOT SIGNAL">重启信号</a>
+- <a href="#INIT COMMAND">初始化命令</a>
+- <a href="#INIT WORKING DIRECTORY">初始化工作路径</a>
+- <a href="#PROC">PROC</a>
 - <a href="#EPHEMERAL ">EPHEMERAL</a>
-- <a href="#NETWORK ">网络</a>
-- <a href="#NEW PSEUDO TTY INSTANCE ">NEW PSEUDO TTY INSTANCE (DEVPTS)</a>
-- <a href="# "></a>
-- <a href="# "></a>
-- <a href="# "></a>
-- <a href="# "></a>
+- <a href="#NETWORK">网络</a>
+- <a href="#NEW PSEUDO TTY INSTANCE">新的伪TTY实例 (DEVPTS)</a>
+- <a href="#CONTAINER SYSTEM CONSOLE">容器系统控制台</a>
+- <a href="#CONSOLE DEVICES LOCATION">控制台设备位置</a>
+- <a href="#DEV DIRECTORY">/DEV 目录</a>
+- <a href="#ROOT FILE SYSTEM">根文件系统</a>
+- <a href="#CONTROL GROUP">控制组</a>
 - <a href="# "></a>
 - <a href="# "></a>
 
@@ -252,10 +253,71 @@ up：激活接口。
 脚本的标准输出在调试级别记录，标准错误不会被记录，但是可以通过钩子将其标准错误重定向到标准输出来捕获。
 
 
-<h2 id="NEW PSEUDO TTY INSTANCE">NEW PSEUDO TTY INSTANCE (DEVPTS)</h2>
+<h2 id="NEW PSEUDO TTY INSTANCE">新的伪TTY实例 (DEVPTS)</h2>
 
-<h2 id=""></h2>
+为了实现更严格的隔离，容器可以有自己的伪 tty 私有实例。
 
-<h2 id=""></h2>
+**lxc.pty.max**
 
-<h2 id=""></h2>
+如果设置，容器将有一个新的伪 tty 实例，使其私有化。该值指定 pty 实例允许的最大伪 tty 数（此限制尚未实现）。
+
+
+<h2 id="CONTAINER SYSTEM CONSOLE">容器系统控制台</h2>
+
+<h2 id="CONSOLE THROUGH THE TTYS">控制台穿透TTYS</h2>
+
+<h2 id="CONSOLE DEVICES LOCATION">控制台设备位置</h2>
+
+<h2 id="CONSOLE DEVICES LOCATION">控制台设备位置</h2>
+
+<h2 id="DEV DIRECTORY">/DEV 目录</h2>
+
+
+<h2 id="ROOT FILE SYSTEM">根文件系统</h2>
+
+容器的根文件系统可以不同于主机系统的根文件系统。
+
+**lxc.rootfs.path**
+
+指定容器的根文件系统。它可以是图像文件、目录或块设备。如果未指定，容器将与主机共享其根文件系统。
+对于目录或简单块设备支持的容器，可以使用路径名。
+
+如果 rootfs 由 nbd 设备支持，那么 nbd:file:1 指定文件应附加到 nbd 设备，分区 1 应作为 rootfs 挂载。overlayfs:/lower:/upper 指定 rootfs 为 overlay，其中 /upper 被以读写方式安装在 /lower 的只读装载上。对于 overlay ，可以指定多个 /lower 的目录。loop:/file 告诉 lxc 将 /file 附加到循环设备并挂载循环设备。
+
+**lxc.rootfs.mount**
+
+**lxc.rootfs.options**
+
+**lxc.rootfs.managed**
+
+<h2 id="CONTROL GROUP">控制组</h2>
+
+控制组部分包含不同子系统的配置。lxc 不检查子系统名称的正确性。这样做的缺点是在容器启动之前不会检测到配置错误，但是它的优点是允许任何新建的子系统。
+
+## lxc.cgroup.[controller name]
+
+继承等级的 cgroup 上设置的控制组值。控制器名称是控制组的名称。允许的名称及其值的语法不是由 LXC 指定的，而是取决于启动容器时运行的 Linux 内核的特性，例如 lxc.cgroup.cpuset.cpus
+
+## lxc.cgroup2.[controller name]
+
+统一的 cgroup 上设置的控制组值。控制器名称是控制组的名称。允许的名称及其值的语法不是由 LXC 指定的，而是取决于启动容器时运行的 Linux 内核的特性，例如  lxc.cgroup2.memory.high
+
+## lxc.cgroup.dir
+
+指定将在其中创建容器的 cgroup 的目录或路径。例如，设置 lxc.cgroup.dir = my cgroup/first 对于名为 “c1” 的容器，将创建容器的 cgroup 作为 “my cgroup” 的子 cgroup。例如，如果用户的当前 cgroup “my user” 位于 cgroup v1层次结构中 cpuset 控制器的根 cgroup 中，则会为容器创建 cgroup “/sys/fs/cgroup/cpuset/my-user/my-cgroup/first/c1”。任何丢失的 cgroup 都将由 LXC 创建。这假定用户对其当前 cgroup 具有写访问权限。
+
+## lxc.cgroup.dir.container
+
+这与 lxc.cgroup.dir 相似，但必须与 lxc.cgroup.dir.monito 一起使用，且只影响容器的 cgroup 路径。此选项与 lxc.cgroup.dir 互斥。 值得注意的是，容器附加到的最终路径可以通过 lxc.cgroup.dir.container.inner 选项进一步扩展。
+
+## lxc.cgroup.dir.monitor
+
+这是对应于 lxc.cgroup.dir.container 的监视进程。 
+
+## lxc.cgroup.dir.monitor.pivot
+
+## lxc.cgroup.dir.container.inner
+
+## lxc.cgroup.relative
+
+
