@@ -176,9 +176,9 @@ network 部分定义如何在容器中虚拟化网络。网络虚拟化作用于
 
 **vlan：** vlan 接口与 lxc.net.[i].link 指定的接口链接并分配给容器。vlan标识符是用选项 lxc.net.[i].vlan.id 指定的。
 
-**macvlan：**
+**macvlan：** macvlan 接口与 lxc.net.[i].link 指定的接口链接并分配给容器。lxc.net.[i].macvlan.mode 指定 macvlan 用于相同的上层设备里不同 macvlan 间通信的模式。可接受的模式有 private、vepa、bridge 和 passthru。在专用模式下，该设备从不与同一上层设备上的任何其他设备通信（默认）。在vepa模式下，新的虚拟以太网端口聚合器（vepa）模式假定相邻网桥返回的源和目标都在 macvlan 端口本地的所有帧上，例如网桥被设置成反射式中继器。在 VEPA 模式下，来自 upper_dev 的广播帧被广播到所有 macvlan 接口，本地帧不在本地传送。在网桥模式下，它提供同一端口上不同 macvlan 接口之间的简单网桥行为。从一个接口到另一个接口的帧是直接传送的，而不是从外部发送出去。广播帧被广播到所有其他的网桥端口和外部接口，但是当它们从反射中继器中继返回时，我们不会再次发送它们。因为我们知道所有的 MAC 地址，macvlan 网桥模式不需要像网桥模块那样学习或 STP。在 passthru 模式下，物理接口接收到的所有帧都被转发到 macvlan 接口。一个物理接口只能有一个处于 assthru 模式的 macvlan 接口。
 
-**ipvlan：**
+**ipvlan：** ipvlan 接口与 lxc.net.[i].link 指定的接口链接并分配给容器。lxc.net.[i].ipvlan.mode 指定ipvlan 用于相同的上策设备里不同的 ipvlan 间通信的模式。可接受的模式有 l3、l3s、和l2。默认是 l3 模式。在 L3 模式下，连接到相关设备的堆栈实例上会发生最多 L3 TX 处理，数据包被切换到父设备的堆栈实例进行 L2 处理，并且在数据包在出站设备上排队之前，将使用来自该实例的路由。在此模式下，从设备将不接收也不能发送多播/广播通信。在 L3 模式下，TX 处理与 L3 模式非常相似，只是 iptables（conn tracking）在这种模式下工作，因此它是三级对称（L3s）。
 
 **phys：** 已经存在的接口由 lxc.net.[i].link 指定分配给容器。
 
