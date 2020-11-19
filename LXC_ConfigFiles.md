@@ -76,7 +76,7 @@ lxc.signal.halt = parameter
 lxc.signal.reboot = parameter
 ```
 
-<h2 id="STOP  SIGNAL">停止信号</h2>
+<h2 id="STOP SIGNAL">停止信号</h2>
 
 允许指定信号名称或编号用作强制关闭容器。此选项允许以kill（1）方式指定信号，例如 SIGKILL、SIGRTMIN+14、SIGRTMAX-10 或普通数字。默认信号是 SIGKILL。
 
@@ -270,6 +270,12 @@ up：激活接口。
 <h2 id="CONSOLE DEVICES LOCATION">控制台设备位置</h2>
 
 <h2 id="DEV DIRECTORY">/DEV 目录</h2>
+
+默认情况下，lxc 会在容器的 /dev 目录中创建一些符号链接（fd、stdin、stdout、stderr），但不会自动创建设备节点条目。这允许用户根据需要在容器 rootfs 中设置容器的 /dev。如果 lxc.autodev 设置为 1，那么在安装容器的 rootfs 之后，LXC 将在 /dev 下挂载一个新的 tmpfs（默认限制为500K，除非 lxc 中另有规定）并填充一组最小的初始设备。启动一个容器时，它包含基于 “systemd” 的 “init” ，这通常是必需的，但在其他时候可能是可选的。通过使用 lxc.hook.autodev 钩子可以在 containers/dev 目录中创建其他设备。
+
+**lxc.autodev：**  将其设置为 0，用来阻止 LXC 在启动容器时装载和填充最小的 /dev。
+
+**lxc.autodev.tmpfs.size：** 设置它以定义 /dev tmpfs 的大小。默认值为 500000（500K）。如果使用了参数但没有值，则使用默认值。
 
 <h2 id="MOUNT POINTS">挂载点</h2>
 
