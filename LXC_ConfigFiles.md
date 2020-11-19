@@ -170,7 +170,7 @@ network 部分定义如何在容器中虚拟化网络。网络虚拟化作用于
 
 **veth：** 创建一个虚拟以太网给设备，其中一端分配给容器，另一端分配给主机。lxc.net.[i].veth.mode 指定父级将在主机上使用的模式。可接受的模式是(bridge)网桥和路由器(router)。如果未指定，则模式默认为桥接。在网桥模式下，主机端根据 lxc.net.[i].link 选项连接到指定的网桥。如果未指定网桥链路，则将创建 veth pair 设备，但不会连接到任何网桥。否则，必须在启动容器之前在系统上创建网桥。lxc 不会处理容器之外的任何配置。在路由器模式下，容器的 IP 地址会被创建，并指向主机端 veth 接口。此外，主机端 veth 接口上添加代理 ARP 和代理 NDP 条目，用于容器中定义的网关 IP，以允许容器到达主机。默认情况下，lxc 为属于容器外部的网络设备选择一个名称，但是如果您希望自己处理这个名称，可以告诉 lxc 使用 lxc.net.[i].veth.pair 选项（出于安全原因忽略此选项的非特权容器除外）。可以使用  lxc.net 在主机上添加指向容器的静态路由。
 
-[i].veth.ipv4.route 和 lxc.net.[i].veth.ipv6.route 选项。多条线指定多个路由。路线的格式为 x.y.z.t/m  例如 192.168.1.0/24
+[i].veth.ipv4.route 和 lxc.net.[i].veth.ipv6.route 选项。多条线指定多个路由。路线的格式为 x.y.z.t/m 例如 192.168.1.0/24
 
 在网桥模式下，可以使用lxc.net.[i].veth.vlan.id 选项设置未标记的VLAN成员身份。它接受一个特殊值 'none' ，表示应该从网桥的默认未标记 VLAN 中删除容器端口。lxc.net.[i].veth.vlan.tagged.id 选项可以被多次指定，以将容器的网桥端口成员身份设置为一个或多个标记的 VLAN。
 
@@ -285,10 +285,7 @@ up：激活接口。
 
 **lxc.rootfs.path**
 
-指定容器的根文件系统。它可以是图像文件、目录或块设备。如果未指定，容器将与主机共享其根文件系统。
-对于目录或简单块设备支持的容器，可以使用路径名。
-
-如果 rootfs 由 nbd 设备支持，那么 nbd:file:1 指定文件应附加到 nbd 设备，分区 1 应作为 rootfs 挂载。overlayfs:/lower:/upper 指定 rootfs 为 overlay，其中 /upper 被以读写方式安装在 /lower 的只读装载上。对于 overlay ，可以指定多个 /lower 的目录。loop:/file 告诉 lxc 将 /file 附加到循环设备并挂载循环设备。
+指定容器的根文件系统。它可以是图像文件、目录或块设备。如果未指定，容器将与主机共享其根文件系统。对于目录或简单块设备支持的容器，可以使用路径名。如果 rootfs 由 nbd(network block device) 设备支持，那么 nbd:file:1 指定文件应附加到 nbd 设备，分区 1 应作为 rootfs 挂载。overlayfs:/lower:/upper 指定 rootfs 为 overlay，其中 /upper 被以读写方式安装在 /lower 的只读装载上。对于 overlay ，可以指定多个 /lower 的目录。loop:/file 告诉 lxc 将 /file 附加到循环设备并挂载循环设备。
 
 **lxc.rootfs.mount**
 
