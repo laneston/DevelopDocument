@@ -16,8 +16,7 @@
 - <a href="#MOUNT POINTS">挂载点</a>
 - <a href="#ROOT FILE SYSTEM">根文件系统</a>
 - <a href="#CONTROL GROUP">控制组</a>
-- <a href="# "></a>
-- <a href="# "></a>
+
 
 <h2 id="DESCRIPTION">概述</h2>
 
