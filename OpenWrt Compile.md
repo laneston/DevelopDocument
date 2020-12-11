@@ -1,10 +1,12 @@
-- 硬件平台：MT7622
+# 编译环境
 
-# 编译准备
+- 硬件平台：MT7622
+- 主机环境：Ubuntu18 Server
+- openwrt 版本：18.06.9
 
 ## 软件安装
 
-在 Ubuntu 上安装以下工具：
+在正式编译前，我们需要在 Ubuntu 上安装以下工具，以保证编译能够正常执行：
 
 ```
 /*获取服务器端更新的清单*/
@@ -70,17 +72,11 @@ sudo apt-get install build-essential
 sudo apt-get install mercurial
 ```
 
-## 下载固件
+## 下载源码
 
-在 <a href = "https://openwrt.org/downloads"> OpenWrt </a> 官网上下载你想要的版本的固件。
-
-<img src="https://github.com/laneston/Pictures/blob/master/Post-OpenWrt/OpenWrt%20kernel.jpg" width="50%" height="50%">
-
-如上图所示，我们选取平台所对应的固件： openwrt-sdk-19.07.4-mediatek-mt7622_gcc-7.5.0_musl.Linux-x86_64.tar
+在 GitHub 上找到 <a href="https://github.com/openwrt/openwrt"> openwrt </a> 源码，选择自己需要的版本进行下载。
 
 # 开始编译
-
-进入待编译目录。
 
 ## 更新软件包
 
@@ -89,11 +85,7 @@ sudo ./scripts/feeds update -a
 sudo ./scripts/feeds install -a
 ```
 
-## 生成配置文件
-
-```
-sudo make defconfig
-```
+这一步不是必须的，但是做这一步处理可以避免出现一些错误。
 
 ## 进入定制界面
 
@@ -103,4 +95,26 @@ sudo make menuconfig
 
 ### 定制界面选项
 
- 
+
+## 问题解决
+
+```
+WARNING: Makefile 'package/utils/busybox/Makefile' has a dependency on 'libpam', which does not exist
+WARNING: Makefile 'package/utils/busybox/Makefile' has a dependency on 'libpam', which does not exist
+WARNING: Makefile 'package/utils/busybox/Makefile' has a build dependency on 'libpam', which does not exist
+WARNING: Makefile 'package/boot/kexec-tools/Makefile' has a dependency on 'liblzma', which does not exist
+WARNING: Makefile 'package/network/services/lldpd/Makefile' has a dependency on 'libnetsnmp', which does not exist
+WARNING: Makefile 'package/utils/policycoreutils/Makefile' has a dependency on 'libpam', which does not exist
+WARNING: Makefile 'package/utils/policycoreutils/Makefile' has a dependency on 'libpam', which does not exist
+WARNING: Makefile 'package/utils/policycoreutils/Makefile' has a build dependency on 'libpam', which does not exist
+ ```
+
+这个警告提示语表示 libpam 这个库没有存在，需在 <a href="https://github.com/openwrt/packages/tree/master/libs"> packages </a> 中找到 libpam 文件夹，然后将文件夹放入本地编译路径 /package/libs 中。
+
+值得注意的是，有些库在 packages 中并非如警告提示中显示的名称，如果找不到，可以在 google 搜索中输入关键词 "openwrt liblzma" 。
+
+<img src="https://github.com/laneston/Pictures/blob/master/Post-OpenWrt/libs-view.jpg" width="50%" height="50%">
+
+打开搜索到的 openwrt 网站页面，就能看到如上图所示的画面。点击最底端的 source code 选项，页面就会跳转到 github 的 packages 源码页面，所显示的部分就是对应的库的路径了。将 packages 中对应路径的部分移动到本地路径，并修改成所需的库的名字。如上图中的例子，在 packages 中找到的路径为：packages/utils/xz
+
+所以接下来把 xz 文件夹移动至本地端的 /package/libs 中即可。
