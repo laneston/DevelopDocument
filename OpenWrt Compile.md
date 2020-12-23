@@ -39,6 +39,8 @@ sudo apt-get install autoconf
 /*GNU awk, a pattern scanning and processing language*/
 sudo apt-get install gawk
 
+sudo apt-get install libssl-dev
+
 /*makefile 脚本执行工具*/
 sudo apt-get install make
 
@@ -96,7 +98,7 @@ sudo make menuconfig
 ### 定制界面选项
 
 
-## 问题解决
+## 问题1
 
 ```
 WARNING: Makefile 'package/utils/busybox/Makefile' has a dependency on 'libpam', which does not exist
@@ -118,3 +120,19 @@ WARNING: Makefile 'package/utils/policycoreutils/Makefile' has a build dependenc
 打开搜索到的 openwrt 网站页面，就能看到如上图所示的画面。点击最底端的 source code 选项，页面就会跳转到 github 的 packages 源码页面，所显示的部分就是对应的库的路径了。将 packages 中对应路径的部分移动到本地路径，并修改成所需的库的名字。如上图中的例子，在 packages 中找到的路径为：packages/utils/xz
 
 所以接下来把 xz 文件夹移动至本地端的 /package/libs 中即可。
+
+## 问题2
+
+```
+make[3]: Leaving directory '/home/openwrt/tools/cmake'
+time: tools/cmake/compile#113.44#11.93#612.80
+tools/Makefile:152: recipe for target 'tools/cmake/compile' failed
+make[2]: *** [tools/cmake/compile] Error 2
+make[2]: Leaving directory '/home/openwrt'
+tools/Makefile:150: recipe for target '/home/openwrt/staging_dir/target-aarch64_cortex-a53_musl/stamp/.tools_compile_yynyyyyynyyyyynyynnyyyynyyyyyyyyyyyyyyynyynynnyyynnyy' failed
+make[1]: *** [/home/openwrt/staging_dir/target-aarch64_cortex-a53_musl/stamp/.tools_compile_yynyyyyynyyyyynyynnyyyynyyyyyyyyyyyyyyynyynynnyyynnyy] Error 2
+make[1]: Leaving directory '/home/openwrt'
+/home/openwrt/include/toplevel.mk:216: recipe for target 'world' failed
+make: *** [world] Error 2
+```
+
