@@ -1,7 +1,7 @@
-# 编译环境
+# 编译环境配置
 
 - 硬件平台：MT7622
-- 主机环境：Ubuntu18 Server
+- 主机环境：Ubuntu20(windows 子系统)
 - openwrt 版本：18.06.9
 
 ## 软件安装
@@ -78,7 +78,20 @@ sudo apt-get install mercurial
 
 在 GitHub 上找到 <a href="https://github.com/openwrt/openwrt"> openwrt </a> 源码，选择自己需要的版本进行下载。
 
-# 开始编译
+
+# 编译过程
+
+在编译前，最好将编译文件夹读写权限设置成最低：
+
+```
+sudo chmod 777 -R openwrt-18.06.9
+```
+
+## 解压源码包
+
+```
+sudo unzip openwrt-18.06.9.zip
+```
 
 ## 更新软件包
 
@@ -87,52 +100,28 @@ sudo ./scripts/feeds update -a
 sudo ./scripts/feeds install -a
 ```
 
-这一步不是必须的，但是做这一步处理可以避免出现一些错误。
-
 ## 进入定制界面
 
 ```
-sudo make menuconfig
+make menuconfig
 ```
 
-### 定制界面选项
-
-
-## 问题1
+### 下载所需工具包
 
 ```
-WARNING: Makefile 'package/utils/busybox/Makefile' has a dependency on 'libpam', which does not exist
-WARNING: Makefile 'package/utils/busybox/Makefile' has a dependency on 'libpam', which does not exist
-WARNING: Makefile 'package/utils/busybox/Makefile' has a build dependency on 'libpam', which does not exist
-WARNING: Makefile 'package/boot/kexec-tools/Makefile' has a dependency on 'liblzma', which does not exist
-WARNING: Makefile 'package/network/services/lldpd/Makefile' has a dependency on 'libnetsnmp', which does not exist
-WARNING: Makefile 'package/utils/policycoreutils/Makefile' has a dependency on 'libpam', which does not exist
-WARNING: Makefile 'package/utils/policycoreutils/Makefile' has a dependency on 'libpam', which does not exist
-WARNING: Makefile 'package/utils/policycoreutils/Makefile' has a build dependency on 'libpam', which does not exist
- ```
+sudo make download
+```
+### 开始编译
 
-这个警告提示语表示 libpam 这个库没有存在，需在 <a href="https://github.com/openwrt/packages/tree/master/libs"> packages </a> 中找到 libpam 文件夹，然后将文件夹放入本地编译路径 /package/libs 中。
-
-值得注意的是，有些库在 packages 中并非如警告提示中显示的名称，如果找不到，可以在 google 搜索中输入关键词 "openwrt liblzma" 。
-
-<img src="https://github.com/laneston/Pictures/blob/master/Post-OpenWrt/libs-view.jpg" width="50%" height="50%">
-
-打开搜索到的 openwrt 网站页面，就能看到如上图所示的画面。点击最底端的 source code 选项，页面就会跳转到 github 的 packages 源码页面，所显示的部分就是对应的库的路径了。将 packages 中对应路径的部分移动到本地路径，并修改成所需的库的名字。如上图中的例子，在 packages 中找到的路径为：packages/utils/xz
-
-所以接下来把 xz 文件夹移动至本地端的 /package/libs 中即可。
-
-## 问题2
 
 ```
-make[3]: Leaving directory '/home/openwrt/tools/cmake'
-time: tools/cmake/compile#113.44#11.93#612.80
-tools/Makefile:152: recipe for target 'tools/cmake/compile' failed
-make[2]: *** [tools/cmake/compile] Error 2
-make[2]: Leaving directory '/home/openwrt'
-tools/Makefile:150: recipe for target '/home/openwrt/staging_dir/target-aarch64_cortex-a53_musl/stamp/.tools_compile_yynyyyyynyyyyynyynnyyyynyyyyyyyyyyyyyyynyynynnyyynnyy' failed
-make[1]: *** [/home/openwrt/staging_dir/target-aarch64_cortex-a53_musl/stamp/.tools_compile_yynyyyyynyyyyynyynnyyyynyyyyyyyyyyyyyyynyynynnyyynnyy] Error 2
-make[1]: Leaving directory '/home/openwrt'
-/home/openwrt/include/toplevel.mk:216: recipe for target 'world' failed
-make: *** [world] Error 2
+sudo make -j1 V=s
 ```
+
+为了增加成功率，编译所设置的线程数最好为1： -j1
+
+如果能够链接 VPN，编译过程中最好全程链接 VPN
+
+
+# 编译问题解决方案
 
