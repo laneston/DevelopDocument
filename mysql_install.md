@@ -18,7 +18,7 @@ mysql交叉编译的主要流程是：主机编译 mysql，交叉编译 boost �
 解压 mysql-5.7.32 压缩包，进入文件夹第一层目录，输入以下命令：
 
 ```
-cmake . -DDOWNLOAD_BOOST=1 -DWITH_BOOST=/home/Mysql_Complie/mysql-8.0.22/boost -DCMAKE_INSTALL_PREFIX=/home/Mysql_Complie/mysql-8.0.22/__install
+cmake . -DDOWNLOAD_BOOST=1 -DWITH_BOOST=/home/mysqlCompile/mysql-5.7.32/boost -DCMAKE_INSTALL_PREFIX=/home/mysqlCompile/mysql-5.7.32/__install
 ```
 
 这个命令是配置命令，目的是生成编译的 Makefile 文件。这个命令的意思是：在当前目录生成 Makefile 文件，并在 /home/Mysql_Complie/mysql-8.0.22/boost 路径下 download boost 库。因为编译 mysql 库时需要依赖 boost。除此之外，主机也需要安装 openssl-dev 库，与 ncurse 库。如果是 ubuntu 环境，可在编译之前输入以下命令进行安装：
@@ -60,7 +60,7 @@ make install
 ```
 if ! gcc in [ feature.values <toolset> ]
 {
-    using gcc : : /home/lanceli/openwrt-toolchain-mediatek-mt7622_gcc-8.3.0_musl.Linux-x86_64/toolchain-aarch64_cortex-a53_gcc-8.3.0_musl/bin/aarch64-openwrt-linux-gcc ;
+    using gcc : : /home/lance/gcc-arm-10.2-2020.11-x86_64-aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu-gcc ;
 }
 ```
 
@@ -86,7 +86,7 @@ if ! gcc in [ feature.values <toolset> ]
 
 解压之后进入文件夹内，输入以下命令配置编辑方式与安装路径：
 ```
-./configure --prefix=/home/Mysql_Complie/ncurses-6.2/__install --host=aarch64-openwrt-linux  CC=aarch64-openwrt-linux-gcc --with-shared  --without-progs
+./configure --prefix=/home/mysqlCompile/ncurses-6.2/__install --host=aarch64-none-linux-gnu  CC=aarch64-none-linux-gnu-gcc --with-shared  --without-progs
 ```
 
 编译与安装：
@@ -97,6 +97,18 @@ make install
 ```
 
 分别输入以上命令即可对 ncurse 库进行编译与安装。
+
+## 编译openssl库
+
+执行以下命令，分别对 openssl 库进行配置编译与安装。
+
+```
+./config --prefix=/home/mysqlCompile/openssl-OpenSSL_1_1_1g/__install --cross-compile-prefix=aarch64-none-linux-gnu- no-asm shared
+make
+make install
+```
+
+以上相对路径可根据自己的本地路径进行修改。
 
 ## 编译tirpc库
 
@@ -117,11 +129,11 @@ SET(CMAKE_SYSTEM_NAME Linux)
 SET(CMAKE_CROSSCOMPILING TRUE)
 
 # specify the cross compiler
-SET(CMAKE_C_COMPILER   /home/lanceli/gcc-arm-10.2-2020.11-x86_64-aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu-gcc)
-SET(CMAKE_CXX_COMPILER /home/lanceli/gcc-arm-10.2-2020.11-x86_64-aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu-g++)
+SET(CMAKE_C_COMPILER   /home/lance/gcc-arm-10.2-2020.11-x86_64-aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu-gcc)
+SET(CMAKE_CXX_COMPILER /home/lance/gcc-arm-10.2-2020.11-x86_64-aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu-g++)
 
 # where is the target environment 
-SET(CMAKE_FIND_ROOT_PATH  /home/lanceli/gcc-arm-10.2-2020.11-x86_64-aarch64-none-linux-gnu)
+SET(CMAKE_FIND_ROOT_PATH  /home/lance/gcc-arm-10.2-2020.11-x86_64-aarch64-none-linux-gnu/bin)
 
 # search for programs in the build host directories (not necessary)
 SET(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
