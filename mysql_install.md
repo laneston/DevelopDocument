@@ -363,3 +363,37 @@ touch /home/lanceli/gcc-arm-10.2-2020.11-x86_64-aarch64-none-linux-gnu/bin/gen_l
 
 继续执行 make 命令进行编译，我们会遇到第八个错误。
 
+## cannot find -ltirpc
+
+```
+/home/lanceli/gcc-arm-10.2-2020.11-x86_64-aarch64-none-linux-gnu/bin/../lib/gcc/aarch64-none-linux-gnu/10.2.1/../../../../aarch64-none-linux-gnu/bin/ld: cannot find -ltirpc
+collect2: error: ld returned 1 exit status
+make[2]: *** [rapid/plugin/group_replication/CMakeFiles/group_replication.dir/build.make:1488: rapid/plugin/group_replication/group_replication.so] Error 1
+make[1]: *** [CMakeFiles/Makefile2:5620: rapid/plugin/group_replication/CMakeFiles/group_replication.dir/all] Error 2
+make: *** [Makefile:163: all] Error 2
+```
+
+这个问题我们需要查看 rapid/plugin/group_replication/CMakeFiles/group_replication.dir/build.make 文件的第 1488 行：
+
+```
+cd /home/mysqlCompile/mysql-5.7.32/rapid/plugin/group_replication && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/group_replication.dir/link.txt --verbose=$(VERBOSE)  
+```
+
+这里执行了一行命令，而命令的位置在 cmake_link_script CMakeFiles/group_replication.dir/link.txt
+
+这里显示找不到 -ltirpc 这一个指令，我们查看 link.txt 文件，并找出 -ltirpc 将它删除即可。
+
+继续执行 make 命令进行编译，我们会遇到第九个错误。
+
+## /bin/sh: 1: protoc: not found
+
+解决办法如下：
+
+```
+cp /home/mysql-5.7.32/extra/protobuf/protoc /home/lanceli/gcc-arm-10.2-2020.11-x86_64-aarch64-none-linux-gnu/bin/
+root@DESKTOP-PGPFAI6:~# touch /home/lanceli/gcc-arm-10.2-2020.11-x86_64-aarch64-none-linux-gnu/bin/protoc
+```
+
+继续执行 make 命令进行编译，我们会遇到第十个错误。
+
+
