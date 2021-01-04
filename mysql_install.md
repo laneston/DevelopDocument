@@ -396,4 +396,31 @@ root@DESKTOP-PGPFAI6:~# touch /home/lanceli/gcc-arm-10.2-2020.11-x86_64-aarch64-
 
 继续执行 make 命令进行编译，我们会遇到第十个错误。
 
+## cannot find -lboost_system -lboost_chrono
 
+这个问题跟之前的 -ltirpc 一样，都是声明后找不到对应的库，这次我们不能讲这两个删除掉，因为编译的过程需要用到这两个库。
+
+```
+/home/lanceli/gcc-arm-10.2-2020.11-x86_64-aarch64-none-linux-gnu/bin/../lib/gcc/aarch64-none-linux-gnu/10.2.1/../../../../aarch64-none-linux-gnu/bin/ld: cannot find -lboost_system
+/home/lanceli/gcc-arm-10.2-2020.11-x86_64-aarch64-none-linux-gnu/bin/../lib/gcc/aarch64-none-linux-gnu/10.2.1/../../../../aarch64-none-linux-gnu/bin/ld: cannot find -lboost_chrono
+collect2: error: ld returned 1 exit status
+make[2]: *** [client/dump/CMakeFiles/mysqlpump.dir/build.make:92: client/dump/mysqlpump] Error 1
+make[1]: *** [CMakeFiles/Makefile2:12520: client/dump/CMakeFiles/mysqlpump.dir/all] Error 2
+make: *** [Makefile:163: all] Error 2
+```
+
+根据错误提示，我们打开 client/dump/CMakeFiles/mysqlpump.dir/build.make 文件，定位到第 92 行。
+
+```
+cd /home/mysqlCompile/mysql-5.7.32/client/dump && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/mysqlpump.dir/link.txt --verbose=$(VERBOSE)
+```
+
+打开相同路径下的 link.txt 文件，并将其中 -lboost_system -lboost_chrono 修改为：
+
+```
+/home/mysqlCompile/boost_1_59_0/__install/lib/libboost_system.so -ldl /home/mysqlCompile/boost_1_59_0/__install/lib/libboost_chrono.so -ldl
+```
+
+继续执行 make 命令进行编译，然后等待代码编译结束。
+
+输入 make install 进行安装，即可在设置的安装路径找到相应的文件。
