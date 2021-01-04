@@ -1,4 +1,4 @@
-# mysql交叉编译与安装
+# 编译准备
 
 - 主机编译平台：ubuntu20.04 (Windows 子系统)
 - 交叉编译链：aarch64-none-linux-gnu-
@@ -28,9 +28,9 @@ apt-get install openssl
 apt-get install libssl-dev
 ```
 
--DCMAKE_INSTALL_PREFIX=/home/Mysql_Complie/mysql-8.0.22/__install 这一句是指定安装路径。
+而 -DCMAKE_INSTALL_PREFIX=/home/Mysql_Complie/mysql-8.0.22/__install 一句是指定安装路径。
 
-如无意外我们已经生成了 Makefile 文件了，我们分别输入以下命令就可以进行编译与安装:
+如无意外，输入以上配置命令后我们已经生成了 Makefile 文件了，接着我们分别输入以下命令就可以进行编译与安装:
 
 ```
 make
@@ -53,9 +53,9 @@ make install
 ./bootstrap.sh  --prefix=/home/mysqlCompile/boost_1_59_0/__install
 ```
 
-相应路径可以根据自己需要进行修改。
+相应的文件路径可以根据自己本地的实际文件路径进行修改。
 
-此次配置会生成名为 b2 的执行文件，配置结束后在 project-config.jam 文件中修改交叉编译链配置：
+此次配置会生成名为 b2 的执行文件，配置结束后需在 project-config.jam 文件中修改交叉编译链的声明：
 
 ```
 if ! gcc in [ feature.values <toolset> ]
@@ -64,9 +64,9 @@ if ! gcc in [ feature.values <toolset> ]
 }
 ```
 
-注意：冒号间与分号前空格的存在。
+**值得注意的是，冒号间与分号前空格的存在，那是必须的。**
 
-依次输入以下命令进行代码的编译与库的安装：
+接着我们依次输入以下命令即可进行代码的编译与库的安装：
 
 ```
 ./b2
@@ -82,9 +82,12 @@ if ! gcc in [ feature.values <toolset> ]
 -DWITH_BOOST=/home/mysqlCompile/mysql-8.0.22/boost
 ```
 
+但是稳妥起见，且为了之后的库移植，最好事先交叉编译好。
+
 ## 编译ncurse库
 
 解压之后进入文件夹内，输入以下命令配置编辑方式与安装路径：
+
 ```
 ./configure --prefix=/home/mysqlCompile/ncurses-6.2/__install --host=aarch64-none-linux-gnu  CC=aarch64-none-linux-gnu-gcc --with-shared  --without-progs
 ```
@@ -110,15 +113,13 @@ make install
 
 以上相对路径可根据自己的本地路径进行修改。
 
-## 编译tirpc库
-
 ## mysql的交叉编译
 
-mysql 交叉编译的过程主要是通过 cmake 生成相应的配置文件与 Makefile，然后再执行 Makefile 脚本文件生成相应的目标文件。在用 cmake 生成 Makefile 文件之间，我们需要对 mysql 工程进行一些修改。
+这是本篇文章的核心部分，mysql 交叉编译的过程主要是通过 cmake 生成相应的配置文件与 Makefile，然后再执行 Makefile 脚本文件生成相应的目标文件。在用 cmake 生成 Makefile 文件之间，我们需要对 mysql 工程进行一些修改。
 
 ### CMakeLists.txt文件的修改
 
-打开一级目录下的 CMakeLists.txt 文件，将以下配置信息复制到文件首部，并保存文件。
+打开一级目录下的 CMakeLists.txt 文件，将以下配置信息复制到文件首部，并保存文件，当然，其中的文件路径需要根据自己的编译环境进行修改。
 
 ```
 # this is required
@@ -167,7 +168,7 @@ SET(CMAKE_CXX_LINK_FLAGS "-L/usr/local/opt/openssl/lib -lssl -lcrypto")
 
 生成配置文件的过程中会有找不到 libevent-2.1.11-stable 版本信息的警告。
 
-这个问题是由于生成的目标文件是运行在目标平台上的ARM文件，由于平台的不同，基本TRY_RUN() 函数执行这个目标文件，文件也是无法在主机平台上运行的。而这和目标文件的动作是获取 libevent 库的版本信息。为了使配置成功执行，我们需要做的是，让 libevent 库的版本信息成功写入到配置文件当中。以下是需要修改的部分：
+这个问题是由于生成的目标文件是运行在目标平台上的ARM文件，由于平台的不同，即便 TRY_RUN() 函数执行这个目标文件，文件也是无法在主机平台上运行的。而这和目标文件的动作目的是获取 libevent 库的版本信息。为了使配置成功执行，我们需要做的是：让 libevent 库的版本信息成功写入到配置文件当中。以下是需要修改的部分：
 
 ```
 MACRO(FIND_LIBEVENT_VERSION)
@@ -207,5 +208,158 @@ cmake . -DENABLE_DOWNLOADS=1 -DWITH_BOOST= /home/mysqlCompile/boost_1_59_0/__ins
 CMake Error: TRY_RUN() invoked in cross-compiling mode, please set the following cache variables appropriately: 
 ```
 
-可再执行一次上一次的配置命令。
+可再执行一次上一次的配置命令，如无意外，我们就能获得 Makefile 文件了，在配置的过程当中，会有文件需要下载，但服务器在国外，如果有梯子，请搭上。
+
+此时可以输入 make 命令进行编译，不出一会儿，这时我们就遇到了编译过程中的第一个错误。
+
+# 开始编译
+
+## /bin/sh: 1: comp_err: not found
+
+这个错误从字面上理解，就是这个脚本没有发现。解决办法就是把我们之前本机编译得到的 comp_err 文件移动到编译环境中的 bin 文件夹中：
+
+```
+cp /home/mysql-5.7.32/extra/comp_err /home/lanceli/gcc-arm-10.2-2020.11-x86_64-aarch64-none-linux-gnu/bin/
+touch /home/lanceli/gcc-arm-10.2-2020.11-x86_64-aarch64-none-linux-gnu/bin/comp_err
+```
+
+继续执行 make 命令进行编译，我们会遇到第二个错误。
+
+## /bin/sh: 1: ./libmysql_api_test: Exec format error
+
+解决办法是将本机编译得到的 libmysql_api_test 文件，移动到交叉编译对应的文件夹中：
+```
+cp /home/mysql-5.7.32/libmysql/libmysql_api_test /home/mysqlCompile/mysql-5.7.32/libmysql/
+```
+
+继续执行 make 命令进行编译，我们会遇到第三个错误。
+
+## error "Unsupported platform"
+
+```
+In file included from /home/mysqlCompile/mysql-5.7.32/storage/innobase/include/os0atomic.h:375,
+                 from /home/mysqlCompile/mysql-5.7.32/storage/innobase/include/ut0ut.h:47,
+                 from /home/mysqlCompile/mysql-5.7.32/storage/innobase/include/univ.i:591,
+                 from /home/mysqlCompile/mysql-5.7.32/storage/innobase/include/ha_prototypes.h:40,
+                 from /home/mysqlCompile/mysql-5.7.32/storage/innobase/api/api0api.cc:35:
+/home/mysqlCompile/mysql-5.7.32/storage/innobase/include/os0atomic.ic:230:2: error: #error "Unsupported platform"
+  230 | #error "Unsupported platform"
+```
+
+这个问题如提示所示，是平台不支持，原因是宏定义的问题。
+
+
+os0atomic.ic 中有 HAVE_IB_GCC_ATOMIC_COMPARE_EXCHANGE 与 IB_STRONG_MEMORY_MODEL 这两个宏定义。
+
+
+在 os0atomic.h 的 60 行附近， 从以上的内容可以看出，只有定义了
+
+```
+ __i386__ || __x86_64__ || _M_IX86 || _M_X64 || __WIN__ 
+```
+
+才能定义 IB_STRONG_MEMORY_MODEL，但是我们是交叉编译 mysql，平台是 arm，明显上面的内容没有定义，所以在交叉编译的时候就没有定义，导致 os0atomic.ic 中的内容没有编译。
+
+修改办法如下：
+
+```
+#if defined __i386__ || defined __x86_64__ || defined _M_IX86 \
+    || defined _M_X64 || defined __WIN__
+
+#define IB_STRONG_MEMORY_MODEL
+
+#else
+
+#define HAVE_ATOMIC_BUILTINS
+
+#endif /* __i386__ || __x86_64__ || _M_IX86 || _M_X64 || __WIN__ */
+```
+
+HAVE_ATOMIC_BUILTINS 这个宏不是随便定义的，可在文章  <a href="https://developer.aliyun.com/article/51094">MariaDB · 社区动态 · MariaDB on Power8</a> 中了解到。
+
+但这样并不能完全解决问题，在 os0atomic.h 文件中找到 os_compare_and_swap_thread_id() 这个函数的定义，而在这个函数的前面有编译条件如下：
+
+```
+# ifdef HAVE_IB_ATOMIC_PTHREAD_T_GCC
+#if defined(HAVE_GCC_SYNC_BUILTINS)
+#  define os_compare_and_swap_thread_id(ptr, old_val, new_val) \
+	os_compare_and_swap(ptr, old_val, new_val)
+#else
+UNIV_INLINE
+bool
+os_compare_and_swap_thread_id(volatile os_thread_id_t* ptr, os_thread_id_t old_val, os_thread_id_t new_val)
+{
+  return __atomic_compare_exchange_n(ptr, &old_val, new_val, 0,
+                                     __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);
+}
+#endif /* HAVE_GCC_SYNC_BUILTINS */
+```
+
+但是交叉编译工具GCC中没有这两个宏，所以运行不了，解决方法是改为如下：
+
+```
+# ifdef HAVE_ATOMIC_BUILTINS
+#if defined(HAVE_ATOMIC_BUILTINS)
+#  define os_compare_and_swap_thread_id(ptr, old_val, new_val) \
+	os_compare_and_swap(ptr, old_val, new_val)
+#else
+UNIV_INLINE
+bool
+os_compare_and_swap_thread_id(volatile os_thread_id_t* ptr, os_thread_id_t old_val, os_thread_id_t new_val)
+{
+  return __atomic_compare_exchange_n(ptr, &old_val, new_val, 0,
+                                     __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);
+}
+#endif /* HAVE_GCC_SYNC_BUILTINS */
+```
+
+继续执行 make 命令进行编译，我们会遇到第四个错误。
+
+## No rule to make target 'scripts/comp_sql'
+
+```
+make[2]: *** No rule to make target 'scripts/comp_sql', needed by 'scripts/sql_commands_sys_schema.h'.  Stop.
+```
+
+解决办法如下：
+
+```
+cp /home/mysql-5.7.32/scripts/comp_sql /home/mysqlCompile/mysql-5.7.32/scripts/
+touch  /home/mysqlCompile/mysql-5.7.32/scripts/comp_sql
+```
+
+继续执行 make 命令进行编译，我们会遇到第五个错误。
+
+## /bin/sh: 1: comp_sql: not found
+
+解决办法如下：
+
+```
+cp /home/mysql-5.7.32/scripts/comp_sql /home/lanceli/gcc-arm-10.2-2020.11-x86_64-aarch64-none-linux-gnu/bin/
+touch /home/lanceli/gcc-arm-10.2-2020.11-x86_64-aarch64-none-linux-gnu/bin/comp_sql
+```
+
+继续执行 make 命令进行编译，我们会遇到第六个错误。
+
+## /bin/sh: 1: gen_lex_hash: not found
+
+解决办法如下：
+
+```
+cp /home/mysql-5.7.32/sql/gen_lex_hash /home/lanceli/gcc-arm-10.2-2020.11-x86_64-aarch64-none-linux-gnu/bin/
+touch /home/lanceli/gcc-arm-10.2-2020.11-x86_64-aarch64-none-linux-gnu/bin/gen_lex_hash
+```
+
+继续执行 make 命令进行编译，我们会遇到第七个错误。
+
+## /bin/sh: 1: gen_lex_token: not found
+
+解决办法如下：
+
+```
+cp /home/mysql-5.7.32/sql/gen_lex_token /home/lanceli/gcc-arm-10.2-2020.11-x86_64-aarch64-none-linux-gnu/bin/
+touch /home/lanceli/gcc-arm-10.2-2020.11-x86_64-aarch64-none-linux-gnu/bin/gen_lex_token
+```
+
+继续执行 make 命令进行编译，我们会遇到第八个错误。
 
