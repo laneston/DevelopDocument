@@ -112,9 +112,6 @@ make install
 
 ## 编译tirpc库
 
-
-
-
 ## mysql的交叉编译
 
 mysql 交叉编译的过程主要是通过 cmake 生成相应的配置文件与 Makefile，然后再执行 Makefile 脚本文件生成相应的目标文件。在用 cmake 生成 Makefile 文件之间，我们需要对 mysql 工程进行一些修改。
@@ -129,11 +126,11 @@ SET(CMAKE_SYSTEM_NAME Linux)
 SET(CMAKE_CROSSCOMPILING TRUE)
 
 # specify the cross compiler
-SET(CMAKE_C_COMPILER   /home/lance/gcc-arm-10.2-2020.11-x86_64-aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu-gcc)
-SET(CMAKE_CXX_COMPILER /home/lance/gcc-arm-10.2-2020.11-x86_64-aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu-g++)
+SET(CMAKE_C_COMPILER /home/lanceli/gcc-arm-10.2-2020.11-x86_64-aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu-gcc)
+SET(CMAKE_CXX_COMPILER /home/lanceli/gcc-arm-10.2-2020.11-x86_64-aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu-g++)
 
 # where is the target environment 
-SET(CMAKE_FIND_ROOT_PATH  /home/lance/gcc-arm-10.2-2020.11-x86_64-aarch64-none-linux-gnu/bin)
+SET(CMAKE_FIND_ROOT_PATH  /home/lanceli/gcc-arm-10.2-2020.11-x86_64-aarch64-none-linux-gnu)
 
 # search for programs in the build host directories (not necessary)
 SET(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
@@ -163,3 +160,52 @@ SET(CMAKE_CXX_LINK_FLAGS "-L/usr/local/opt/openssl/lib -lssl -lcrypto")
 4. cmake 寻找链接文件的规则；
 5. boost 库的路径信息；
 6. openssl库路径信息。
+
+修改完 CMakeLists.txt 文件后，我们还需要修改 libevent.cmake 文件。
+
+## 修改 libevent.cmake 文件
+
+生成配置文件的过程中会有找不到 libevent-2.1.11-stable 版本信息的警告。
+
+这个问题是由于生成的目标文件是运行在目标平台上的ARM文件，由于平台的不同，基本TRY_RUN() 函数执行这个目标文件，文件也是无法在主机平台上运行的。而这和目标文件的动作是获取 libevent 库的版本信息。为了使配置成功执行，我们需要做的是，让 libevent 库的版本信息成功写入到配置文件当中。以下是需要修改的部分：
+
+```
+MACRO(FIND_LIBEVENT_VERSION)
+
+  SET(LIBEVENT_VERSION "2.1.11-stable")
+  SET(COMPILE_TEST_RESULT TRUE)
+  SET(RUN_OUTPUT "2.1.11-stable")
+
+  # MESSAGE(STATUS "TRY_EVENT TEST_RUN_RESULT is ${TEST_RUN_RESULT}")
+  # MESSAGE(STATUS "TRY_EVENT COMPILE_TEST_RESULT is ${COMPILE_TEST_RESULT}")
+  # MESSAGE(STATUS "TRY_EVENT COMPILE_OUTPUT_VARIABLE is ${OUTPUT}")
+  # MESSAGE(STATUS "TRY_EVENT RUN_OUTPUT_VARIABLE is ${RUN_OUTPUT}")
+
+  IF(COMPILE_TEST_RESULT)
+    SET(LIBEVENT_VERSION_STRING "${RUN_OUTPUT}")
+    STRING(REGEX REPLACE
+      "([.-0-9]+).*" "\\1" LIBEVENT_VERSION "${LIBEVENT_VERSION_STRING}")
+    MESSAGE(STATUS "LIBEVENT_VERSION_STRING ${LIBEVENT_VERSION_STRING}")
+    MESSAGE(STATUS "LIBEVENT_VERSION (${WITH_LIBEVENT}) ${LIBEVENT_VERSION}")
+  ELSE()
+    MESSAGE(WARNING "Could not determine LIBEVENT_VERSION")
+  ENDIF()
+ENDMACRO()
+```
+
+上面 cmake 命令修改的部分是将版本信息直接定义到 LIBEVENT_VERSION 变量中，跳过了代码编译与运行的步骤。
+
+修改完毕后执行一次 cmake 命令：
+
+```
+cmake . -DENABLE_DOWNLOADS=1 -DWITH_BOOST= /home/mysqlCompile/boost_1_59_0/__install -DCMAKE_INSTALL_PREFIX=/home/mysqlCompile/mysql-5.7.32/__install -DCURSES_INCLUDE_PATH=/home/mysqlCompile/ncurses-6.2/__install/include -DCURSES_LIBRARY=/home/mysqlCompile/ncurses-6.2/__install/lib/libncurses.so -DSTACK_DIRECTION=1 -DWITH_LIBEVENT="bundled"
+```
+
+如果不能正常生成 Makefile 文件并伴有以下错误信息 ：
+
+```
+CMake Error: TRY_RUN() invoked in cross-compiling mode, please set the following cache variables appropriately: 
+```
+
+可再执行一次上一次的配置命令。
+
