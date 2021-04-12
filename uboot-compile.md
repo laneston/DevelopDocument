@@ -22,4 +22,5 @@ apt-get install flex
 
 ```
 make 
+make ARCH=arm CROSS_COMPILE=aarch64-none-linux-gnu-
 ```
