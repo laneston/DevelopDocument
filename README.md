@@ -4,7 +4,7 @@
 
 **2. <a href="https://github.com/laneston/Note/blob/master/Hey_Makefile.md"> Hey Makefile! </a>**
 
-文章通过两个例子来说明 Makefile 是如何运行的，笔者用较小的篇幅来概括初学者在编写 Makefile 时会遇到的问题，这篇文章的目的就是用最直接简单有效的方式教会大家编写 Makefile。在看完这篇文章后，也能开始写自己的 Makefile 。
+文章通过两个例子来说明 Makefile 是如何运行的，文章用较小的篇幅来概括初学者在编写 Makefile 时会遇到的问题，目的是用最直接简单有效的方式教会大家编写 Makefile。
 
 **3. <a href="https://github.com/laneston/Note/blob/master/Makefile_Note.md"> Makefile_Note </a>**
 
