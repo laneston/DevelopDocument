@@ -21,6 +21,6 @@ apt-get install flex
 
 
 ```
-make bananapi_r64_defconfig
+make ARCH=arm CROSS_COMPILE=aarch64-none-elf- bananapi_r64_defconfig
 make ARCH=arm CROSS_COMPILE=aarch64-none-elf-
 ```
