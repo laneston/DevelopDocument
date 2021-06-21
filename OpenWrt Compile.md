@@ -124,14 +124,8 @@ make -j1 V=s
 
 # 编译问题解决方案
 
-这个错误提示告诉我们不能用 root 权限编译，我们将文件夹设置为最低权限。
+you should not run configure as root (set FORCE_UNSAFE_CONFIGURE=1 in environment to bypass this check)
 
-```
-sudo chmod 777 -R openwrt-18.06.9
-```
+这个错误提示告诉我们不能用 root 权限编译。
 
-然后继续输入 make -j1 V=s 进行编译。
-
-错误提示告诉我们没有 权限。
-
-我们输入 sudo make -j1 V=s 继续编译。
+然后继续输入 make -j1 FORCE_UNSAFE_CONFIGURE=1 V=s 进行编译。
